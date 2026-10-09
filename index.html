@@ -379,7 +379,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 </div>
 </div>
 
-<div class="pop" id="notifPop"><h3 id="ntTitle">Notifications <small id="ntSub"></small></h3><div id="ntList"></div></div>
+<div class="pop" id="notifPop"><h3 id="ntTitle">Notifications <small id="ntSub"></small><button id="ntClearAll" style="border:0;background:none;color:var(--neg);font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0 0 0 8px;margin-left:auto">Clear all</button></h3><div id="ntList"></div></div>
 <div class="pop" id="userPop"><div class="who"><span class="avatar" id="avBig"></span><div><b id="uName"></b><small id="uRole">MAS Digital Service</small></div></div><button class="row2" id="themeBtn"><span>Dark / light mode</span><span>◐</span></button><button class="row2" id="installBtn" hidden><span>Install app</span><span>⬇</span></button><button class="row2" id="alertBtn"><span>Phone alerts</span><span id="alertState">Off</span></button><button class="row2 out" id="logoutBtn"><span>Log out</span><span>⎋</span></button></div>
 
 <nav id="bottomNav"><div class="in" id="bottomNavIn">
@@ -441,12 +441,9 @@ var LEAVE_REQUESTS = [
 /* 5. DAY REPORT — the cloud response, exactly as the API returns it (this copy is daily_report_2026-10-08.json).
       Replace DAILY_JSON with the fetched response; buildReport() turns it into what the page draws. */
 var DAILY_JSON = {
-    "business": "MAS DIGITAL SERVICE",
-    "report": "Daily Reports",
     "date": "2026-10-08",
     "generatedBy": "TAMIL",
     "generatedAt": "2026-10-08T17:17:02",
-    "currency": "INR",
     "daySaleSummary": {
       "cash": 26430,
       "digital": 29873,
@@ -520,10 +517,11 @@ function buildReport(j){
   var at=(g.getMonth()+1)+"/"+g.getDate()+"/"+g.getFullYear()+" "+((h%12)||12)+":"+("0"+g.getMinutes()).slice(-2)+":"+("0"+g.getSeconds()).slice(-2)+" "+(h<12?"AM":"PM");
   return {
     date:d(j.date), generatedBy:j.generatedBy, generatedAt:at,
-    summary:{cash:sm.cash,digital:sm.digital,wallet:sm.wallet,pending:sm.pending,expense:sm.expense,total:sm.total,totalSales:sm.totalSales},
+    summary:{cash:sm.cash,digital:sm.digital,wallet:sm.wallet,pending:sm.pending,expense:sm.expense,total:sm.total,
+      totalSales:j.last5DaySales&&j.last5DaySales.length>1?(sm.total-(j.last5DaySales[1].Total||0)+(j.last5DaySales[1].Expense||0)):sm.totalSales||0},
     channels:ch,
     days:j.last5DaySales.map(function(x){return {date:d(x.date),v:ch.map(function(k){return x[k]||0}),cash:x.Cash,pending:x.Pending,expense:x.Expense,total:x.Total}}),
-    pendingPayments:((j.pendingPayments||{}).items||[]).map(function(r){return {id:r.id,name:r.customer,credit:r.credit,debit:r.debit,pending:r.pending,total:r.totalPending}}),
+    pendingPayments:((j.pendingPayments||{}).items||[]).filter(function(r){return (r.totalPending||r.total||r.pending||0)!==0}).map(function(r,i){return {id:+r.id||i+1,name:r.customer||r.name||"",credit:r.credit||0,debit:r.debit||0,pending:r.pending||0,total:r.totalPending||r.total||0}}),
     expenses:(j.expenses&&j.expenses.items||j.expenses||[]).map(function(e){return {category:e.category,amount:e.amount,count:e.count,description:e.description}}),
     todos:((j.activeTodoList||{}).items||[]).map(function(t){return {task:t.task,created:String(t.createdDate).replace("T"," ")}})
   };
@@ -544,16 +542,28 @@ function buildReport(j){
     init(DAILY_JSON, null); return;
   }
 
-  // Fetch both report data and user credentials in parallel
+  // Fetch latest 5 report rows + user credentials in parallel
   Promise.all([
-    fetch(SB_URL+'/rest/v1/day_sale_report?select=date,data&order=date.desc&limit=1', {headers: sbHeaders})
+    fetch(SB_URL+'/rest/v1/day_sale_report?select=date,data&order=date.desc&limit=5', {headers: sbHeaders})
       .then(function(r){ return r.json(); }),
     fetch(SB_URL+'/rest/v1/user_credentials?select=*', {headers: sbHeaders})
       .then(function(r){ return r.json(); })
   ])
   .then(function(results){
     var reportRows = results[0], credRows = results[1];
-    var json = (reportRows && reportRows.length && reportRows[0].data) ? reportRows[0].data : DAILY_JSON;
+    if(!reportRows || !reportRows.length || !reportRows[0].data){ init(DAILY_JSON, null); return; }
+    // Use latest row as the main report; inject last5DaySales from all 5 rows
+    var json = reportRows[0].data;
+    // Build last5DaySales from the 5 rows using each row's todayChannels
+    json.last5DaySales = reportRows.map(function(row){
+      var d = row.data;
+      if(d.todayChannels) return d.todayChannels;
+      // Fallback for old rows that still have last5DaySales embedded
+      if(d.last5DaySales && d.last5DaySales.length) return d.last5DaySales[0];
+      // Last resort: summary only
+      var s = d.daySaleSummary || {};
+      return { date: d.date, Cash: s.cash||0, Pending: s.pending||0, Expense: s.expense||0, Total: s.total||0 };
+    });
     var users = null;
     if(credRows && credRows.length){
       users = credRows.map(function(c, i){
@@ -698,6 +708,7 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
   function unread(){return items.filter(function(n){return !read[n.id]}).length}
   function norm(n){var t=n.time?new Date(n.time).getTime():NaN;
     return {id:String(n.id!=null?n.id:(n.title||"")+(n.time||"")),type:TY[n.type]?n.type:"info",title:n.title||"",text:n.text||"",time:isNaN(t)?Date.now():t}}
+  function dismiss(id){items=items.filter(function(n){return n.id!==id});read[id]=1;save();render();}
 
   var np=$("notifPop"),up=$("userPop"),bell=$("bellBtn");
   function render(){
@@ -705,9 +716,27 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
     b.textContent=c>0?(c>99?"99+":c):"";
     $("ntSub").textContent=c>0?c+" new":"All caught up";
     $("ntList").innerHTML=items.length?items.map(function(n){var t=TY[n.type];
-      return '<div class="nt"><span class="d" style="background:'+t[0]+'">'+t[1]+'</span><div style="flex:1"><b>'+esc(n.title)+'</b><small>'+esc(n.text)+'</small></div><small class="tm">'+rel(n.time)+'</small>'+(read[n.id]?'':'<i class="nd"></i>')+'</div>'}).join("")
+      return '<div class="nt" data-nid="'+esc(n.id)+'" style="position:relative;overflow:hidden;transition:transform .25s,opacity .25s">'+
+        '<span class="d" style="background:'+t[0]+'">'+t[1]+'</span>'+
+        '<div style="flex:1;min-width:0"><b>'+esc(n.title)+'</b><small>'+esc(n.text)+'</small></div>'+
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none">'+
+        '<small class="tm">'+rel(n.time)+'</small>'+(read[n.id]?'':'<i class="nd"></i>')+
+        '<button data-clr="'+esc(n.id)+'" style="border:0;background:none;color:var(--muted);font-size:13px;line-height:1;cursor:pointer;padding:2px 0">✕</button>'+
+        '</div></div>';
+    }).join("")
       :'<div class="nt"><small>No notifications yet.</small></div>';
+    /* swipe to dismiss */
+    Array.prototype.forEach.call($("ntList").querySelectorAll('.nt[data-nid]'),function(el){
+      var sx=0,sw=el.offsetWidth;
+      el.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{ passive:true });
+      el.addEventListener('touchmove',function(e){var dx=e.touches[0].clientX-sx;if(Math.abs(dx)>10)el.style.transform='translateX('+dx+'px)';},{ passive:true });
+      el.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-sx;
+        if(Math.abs(dx)>sw*.35){el.style.opacity='0';el.style.transform='translateX('+(dx>0?sw:-sw)+'px)';setTimeout(function(){dismiss(el.dataset.nid)},250);}
+        else{el.style.transform='';}});
+    });
   }
+  $("ntList").addEventListener('click',function(e){var b=e.target.closest('[data-clr]');if(b){e.stopPropagation();dismiss(b.dataset.clr);}});
+  $("ntClearAll").onclick=function(e){e.stopPropagation();items=[];read={};save();render();};
   function ring(){bell.classList.remove("ring");void bell.offsetWidth;bell.classList.add("ring");$("badge").classList.remove("pulse");void $("badge").offsetWidth;$("badge").classList.add("pulse")}
 
   /* WhatsApp-style heads-up banner; when the app is in the background it also uses the phone's own notification if allowed */
