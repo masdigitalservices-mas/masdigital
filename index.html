@@ -305,7 +305,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
   <label class="lgrem" id="lgRemRow"><input type="checkbox" id="lgRem" checked>Remember me on this device</label>
   <div class="lgerr" id="lgErr"></div>
   <button class="btn" id="lgBtn" type="button">Sign in</button>
- 
+  <p class="lghint" id="lgHint"></p>
  </div>
 </div>
 <div class="app" id="app">
@@ -581,8 +581,7 @@ function sum(a){return a.reduce(function(x,y){return x+y},0)}
 /* ===== Fetch from Supabase first, fall back to hardcoded DAILY_JSON ===== */
 document.title = APP.name+" - "+APP.reportLabel;
 $("appTitle").textContent = APP.name; $("lgTitle").textContent = APP.name;
-$("lgHint").hidden = !APP.demoHint || USERS !== (window._origUSERS||USERS);
-if(APP.demoHint) $("lgHint").innerHTML = "Demo accounts (replace with your real login):<br>"+esc(APP.demoHint);
+var lgHint=$("lgHint");if(lgHint){lgHint.hidden=!APP.demoHint;if(APP.demoHint)lgHint.innerHTML="Demo accounts (replace with your real login):<br>"+esc(APP.demoHint);}
 $("sub").textContent = APP.reportLabel+" · "+REPORT.date;
 var prev = REPORT.days[1], today = REPORT.days[0];
 var diff = prev ? today.total - prev.total : 0;
