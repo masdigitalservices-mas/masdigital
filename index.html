@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e7490">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MAS">
+<title>MAS Digital Service - Day Sale</title>
+<style>
+:root{
+  --brand:#0e7490;--brand-2:#06b6d4;
+  --bg:#eef3f6;--card:#fff;--text:#14212b;--muted:#64748b;--line:#e2e8f0;--chip:#e6eef3;
+  --cash:#06b6d4;--digital:#8b5cf6;--wallet:#7c2d12;--pending:#f59e0b;--expense:#ef4444;--total:#059669;--sales:#4caf50;
+  --pos:#059669;--neg:#dc2626;
+  --r:18px;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b141a;--card:#131f27;--text:#e6edf2;--muted:#8da0ae;--line:#223340;--chip:#1b2b36;--brand:#22d3ee;
+}}
+:root[data-theme="dark"]{--bg:#0b141a;--card:#131f27;--text:#e6edf2;--muted:#8da0ae;--line:#223340;--chip:#1b2b36;--brand:#22d3ee}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  padding-bottom:calc(env(safe-area-inset-bottom,0px) + 76px)}
+.app{max-width:560px;margin:0 auto}
+.num{font-variant-numeric:tabular-nums}
+
+/* top */
+.top{background:linear-gradient(160deg,#0e7490,#155e75);color:#fff;
+  padding:calc(env(safe-area-inset-top,0px) + 16px) 18px 74px;border-radius:0 0 26px 26px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:50%;border:3px solid #38bdf8;display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;background:#fff;color:#0e7490}
+.brand h1{margin:0;font-size:clamp(14px,4.4vw,17px);font-weight:700;white-space:nowrap}
+.brand>div:not(.acts){flex:1;min-width:0}
+.brand p{margin:2px 0 0;font-size:12.5px;opacity:.85}
+.theme{margin-left:auto;border:0;background:#ffffff26;color:#fff;border-radius:12px;width:38px;height:38px;font-size:17px}
+
+/* hero */
+.hero{margin:-54px 14px 0;background:var(--card);border-radius:var(--r);padding:18px;box-shadow:0 8px 24px #0f2a3a1f}
+.hero .lbl{color:var(--muted);font-size:13px}
+.hero .big{font-size:34px;font-weight:800;color:var(--total);letter-spacing:-.5px;margin-top:2px}
+.delta{display:inline-block;margin-top:6px;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--chip)}
+.delta.up{color:var(--pos)}.delta.down{color:var(--neg)}
+.split{display:flex;height:9px;border-radius:9px;overflow:hidden;margin-top:16px;background:var(--chip)}
+.split i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend b{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
+
+/* kpi */
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+.kpi{border-radius:16px;padding:13px 14px;color:#fff;min-height:74px}
+.kpi small{display:block;font-size:12px;opacity:.9}
+.kpi strong{display:block;font-size:19px;margin-top:4px}
+.kpi.wide{grid-column:1/-1}
+
+/* sections */
+section{padding:6px 14px 4px;scroll-margin-top:70px}
+h2{font-size:17px;margin:14px 2px 10px;display:flex;align-items:baseline;gap:8px}
+h2 em{font-style:normal;font-size:13px;font-weight:600;color:var(--muted)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:0 1px 3px #0f2a3a14;overflow:hidden}
+
+/* day chips */
+.days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{flex:0 0 auto;border:0;background:var(--chip);color:var(--text);border-radius:14px;padding:8px 14px;text-align:left;font:inherit;min-width:92px}
+.day small{display:block;color:var(--muted);font-size:11.5px}
+.day b{font-size:13.5px}
+.day.on{background:var(--brand);color:#fff}
+.day.on small{color:#ffffffcc}
+:root[data-theme="dark"] .day.on,:root:not([data-theme="light"]) .day.on{color:#06222b}
+@media(prefers-color-scheme:light){.day.on{color:#fff}}
+
+/* trend */
+.trend{padding:14px 14px 8px}
+.trend svg{width:100%;height:84px;display:block}
+.trend .cap{display:flex;justify-content:space-between;color:var(--muted);font-size:11.5px;margin-top:4px}
+
+/* channel rows */
+.sumline{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+.sumline div{padding:12px 10px;text-align:center}
+.sumline small{display:block;color:var(--muted);font-size:11.5px}
+.sumline b{font-size:14.5px}
+.sumline div+div{border-left:1px solid var(--line)}
+.ch{padding:11px 14px;border-bottom:1px solid var(--line)}
+.ch:last-child{border-bottom:0}
+.ch .t{display:flex;justify-content:space-between;font-size:14px}
+.ch .t span:first-child{font-weight:600}
+.bar{height:5px;border-radius:5px;background:var(--chip);margin-top:7px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px;background:var(--brand-2)}
+.more{width:100%;border:0;background:transparent;color:var(--brand);font:inherit;font-weight:600;padding:12px}
+.zero{color:var(--muted);font-size:12px;padding:10px 14px;border-top:1px solid var(--line)}
+
+/* compare table (collapsible) */
+details.cmp{margin-top:10px}
+details.cmp summary{list-style:none;cursor:pointer;padding:14px;font-weight:600;display:flex;justify-content:space-between}
+details.cmp summary::-webkit-details-marker{display:none}
+details.cmp summary:after{content:"▾";color:var(--muted)}
+details[open].cmp summary:after{content:"▴"}
+.scroll{overflow-x:auto;border-top:1px solid var(--line)}
+.scroll table{border-collapse:collapse;width:100%;min-width:440px;font-size:12.5px}
+.scroll th,.scroll td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.scroll th:first-child,.scroll td:first-child{text-align:left;position:sticky;left:0;background:var(--card);font-weight:600}
+.scroll th{color:var(--muted);font-weight:600;background:var(--chip)}
+.scroll tr:last-child td{border-bottom:0}
+
+/* pending */
+.p{padding:13px 14px;border-bottom:1px solid var(--line)}
+.ph{display:flex;gap:12px;align-items:center}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pg div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-radius:10px;padding:7px 11px;font-size:12px}
+.pg .cr{background:color-mix(in srgb,var(--pos) 12%,transparent);color:var(--pos)}
+.pg .db{background:color-mix(in srgb,var(--neg) 12%,transparent);color:var(--neg)}
+.pg span{font-weight:600;letter-spacing:.2px}
+.pg b{font-size:13.5px}
+.pg .z{opacity:.45}
+.p:last-child{border-bottom:0}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;background:var(--chip);flex:none}
+.p .m{flex:1;min-width:0}
+.p .m b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p .m small{color:var(--muted);font-size:12px}
+.p .a{text-align:right}
+.p .a b{display:block;font-size:15px}
+.p .a small{color:var(--muted);font-size:11.5px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+
+/* expense */
+.exp{display:flex;justify-content:space-between;gap:12px;padding:14px}
+.exp small{color:var(--muted);display:block;font-size:12px;margin-top:2px}
+.tag{display:inline-block;background:var(--chip);border-radius:8px;padding:2px 8px;font-size:11.5px;color:var(--muted);margin-left:6px}
+
+/* todo */
+.todo{display:flex;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line);align-items:flex-start}
+.todo:last-child{border-bottom:0}
+.dot{width:18px;height:18px;border:2px solid var(--brand-2);border-radius:6px;flex:none;margin-top:2px}
+.todo b{font-weight:600;display:block}
+.todo small{color:var(--muted);font-size:12px}
+.age{margin-left:auto;font-size:11.5px;font-weight:600;border-radius:99px;padding:3px 9px;background:var(--chip);color:var(--muted);white-space:nowrap;flex:none}
+.age.old{background:#fee2e2;color:#b91c1c}
+.age.mid{background:#fef3c7;color:#92400e}
+
+footer{text-align:center;color:var(--muted);font-size:12px;padding:22px 16px}
+
+/* bottom nav */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+  padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px);display:flex;justify-content:center;z-index:10}
+nav .in{display:flex;max-width:560px;width:100%}
+nav a{flex:1;text-align:center;color:var(--muted);text-decoration:none;font-size:11px;padding:4px 0;border-radius:10px}
+nav a span{display:block;font-size:19px;line-height:1.2}
+nav a.on{color:var(--brand);font-weight:700}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+
+.top{position:relative;overflow:hidden}
+.top .art{position:absolute;right:-30px;top:-20px;width:260px;height:200px;opacity:.5;pointer-events:none}
+.brand{position:relative;z-index:1}.top .art{z-index:0}.hero{position:relative;z-index:2}
+svg.logo{width:44px;height:44px;border:0;background:none;display:block;flex:none}
+h2:before{content:"";width:5px;height:18px;border-radius:3px;background:linear-gradient(var(--brand-2),var(--digital));align-self:center}
+.kpi{position:relative;overflow:hidden;background-image:linear-gradient(135deg,rgba(255,255,255,.24),rgba(0,0,0,.16))}
+.kpi:before{content:"";position:absolute;right:-22px;bottom:-26px;width:90px;height:90px;border-radius:50%;background:#ffffff26}
+.kpi:after{content:"";position:absolute;right:14px;bottom:14px;width:34px;height:34px;border-radius:50%;background:#ffffff1f}
+.kpi .ic{position:absolute;right:12px;top:12px;width:30px;height:30px;border-radius:10px;background:#ffffff33;display:grid;place-items:center;z-index:1}
+.kpi .ic svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.kpi small,.kpi strong{position:relative;z-index:1}
+.mix{display:flex;align-items:center;gap:16px;margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
+.donut{width:112px;height:112px;flex:none}
+.donut text{fill:var(--text);text-anchor:middle}
+.mixl{flex:1;display:grid;gap:9px;font-size:13px}
+.mixl div{display:flex;align-items:center;gap:8px}
+.mixl b{width:10px;height:10px;border-radius:3px;flex:none}
+.mixl span{flex:1;color:var(--muted)}
+.mixl em{font-style:normal;font-weight:700}
+.chartcard{padding:14px 10px 10px}
+.chartcard svg{width:100%;height:auto;display:block}
+.chartcard text{fill:var(--muted);font-size:9.5px;text-anchor:middle}
+.chartcard .v{fill:var(--text);font-weight:700}
+.cl{display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;font-size:12px;color:var(--muted);margin-top:6px}
+.cl b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.chip{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700;flex:none}
+.ch{display:flex;gap:11px;align-items:center}.ch .bd{flex:1;min-width:0}
+.bar{height:7px}
+
+.acts{margin-left:auto;display:flex;align-items:center;gap:10px;flex:none}
+.ibtn{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:#ffffff26;display:grid;place-items:center;padding:0}
+.ibtn svg{width:21px;height:21px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:#ef4444;color:#fff;font:700 11px/18px system-ui,sans-serif;text-align:center;padding:0 5px;border:2px solid #0e7490;box-sizing:content-box;font-style:normal}
+.badge:empty{display:none}
+.avatar{width:40px;height:40px;border-radius:50%;border:2px solid #fff;background:linear-gradient(135deg,#f59e0b,#e11d74);color:#fff;font:700 16px system-ui,sans-serif;padding:0}
+.pop{position:fixed;z-index:30;top:calc(env(safe-area-inset-top,0px) + 68px);right:14px;width:min(330px,calc(100vw - 28px));background:var(--card);color:var(--text);border-radius:16px;box-shadow:0 12px 36px #0a1f2c40;display:none;overflow:hidden}
+.pop.open{display:block}
+.pop h3{margin:0;padding:14px 16px;font-size:15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.pop h3 small{color:var(--muted);font-weight:500}
+.nt{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.nt:last-child{border-bottom:0}
+.nt .d{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none;font-size:15px}
+.nt b{display:block;font-size:13.5px}.nt small{color:var(--muted);font-size:12px}
+.who{display:flex;gap:12px;align-items:center;padding:16px;border-bottom:1px solid var(--line)}
+.who .avatar{width:44px;height:44px;border-color:var(--line)}
+.who small{color:var(--muted);display:block;font-size:12px}
+.pop button.row2{width:100%;border:0;background:none;color:var(--text);font:inherit;text-align:left;padding:14px 16px;display:flex;justify-content:space-between}
+
+.nt .tm{white-space:nowrap;font-size:11px;align-self:flex-start}
+.nd{width:8px;height:8px;border-radius:50%;background:var(--brand-2);flex:none;align-self:center}
+@keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(16deg)}30%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}60%{transform:rotate(-8deg)}75%{transform:rotate(4deg)}}
+@keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:no-preference){.ibtn.ring svg{animation:ring .8s ease;transform-origin:50% 10%}.badge.pulse{animation:pulse .5s ease}}
+
+nav a span{font-size:19px;line-height:1;width:48px;height:28px;border-radius:14px;margin:0 auto 3px;display:grid;place-items:center;transition:background .2s}
+nav a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+nav a.on span{background:color-mix(in srgb,var(--brand) 16%,transparent)}
+/* compact day grid */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.ct{background:var(--card);padding:9px 11px 8px;display:grid;grid-template-columns:28px 1fr;gap:0 8px;align-items:center;min-width:0}
+.ct .chip{width:28px;height:28px;font-size:10.5px;grid-row:1/3}
+.ct small{color:var(--muted);font-size:11.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct b{font-size:14px;line-height:1.25}
+.ct.z .chip{background:#94a3b8}
+.ct.z b{color:var(--muted)}
+.ct .note{grid-column:1/-1;font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap}
+.ct .bar{grid-column:1/-1;height:3px;margin-top:7px}
+.hrow{display:flex;align-items:center;gap:6px}
+.hl{flex:1;min-width:0}
+.hero .big{font-size:30px}
+.donut{width:112px;height:112px;flex:none}
+/* cash / pending / expense strip: same layout, coloured with a different font style */
+.sumline.c div{padding:11px 6px 10px;box-shadow:inset 0 -3px 0 var(--c);background:color-mix(in srgb,var(--c) 7%,transparent)}
+.sumline.c small{color:var(--c);font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.sumline.c b{display:block;margin-top:3px;font-size:16.5px;font-weight:800;letter-spacing:-.3px;color:var(--c);font-family:Georgia,"Times New Roman",serif}
+/* login */
+body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
+#loginScreen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#0e7490,#0b141a);overflow:auto}
+.lgcard{width:100%;max-width:380px;background:var(--card);color:var(--text);border-radius:22px;padding:26px 22px;box-shadow:0 20px 50px #0008}
+.lgcard .lgm{width:56px;height:56px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;background:#fff;border:3px solid #38bdf8;color:#e11d74;font-weight:800;font-size:17px}
+.lgcard h1{margin:0;text-align:center;font-size:20px}
+.lgcard p{margin:4px 0 18px;text-align:center;color:var(--muted);font-size:13px}
+.lgcard label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:12px}
+.lgcard input[type=text],.lgcard input[type=password]{display:block;width:100%;margin-top:5px;font:inherit;font-size:15px;color:var(--text);background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px}
+.lgpw{position:relative}
+.lgpw button{position:absolute;right:6px;bottom:6px;border:0;background:none;color:var(--brand);font:inherit;font-size:12px;font-weight:700;padding:8px}
+.lgrem{display:flex!important;align-items:center;gap:8px;font-size:13px!important;color:var(--text)!important;font-weight:500!important}
+.lgrem input{width:18px;height:18px;accent-color:var(--brand)}
+.lgcard .btn{width:100%;margin-top:4px}
+.lgerr{color:var(--neg);font-size:12.5px;min-height:18px;margin-bottom:6px;text-align:center}
+.lghint{margin-top:14px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.5}
+.pop button.row2.out{color:var(--neg);border-top:1px solid var(--line)}
+.lvrj{display:flex;gap:8px;margin-top:8px}
+.lvrj input{flex:1;min-width:0;width:auto!important}
+.lvrj button{flex:none;border:0;border-radius:10px;padding:0 14px;font:inherit;font-weight:700;background:#dc2626;color:#fff}
+.lvby{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
+/* heads-up alert */
+.toast{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:90;width:calc(100% - 20px);max-width:440px;display:flex;align-items:center;gap:11px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:11px 13px;box-shadow:0 12px 34px #0006;cursor:pointer}
+.toast.in{animation:tin .45s cubic-bezier(.2,1.1,.3,1) forwards}
+@keyframes tin{to{transform:translate(-50%,0)}}
+.toast .d{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;flex:none}
+.toast b{display:block;font-size:14px}
+.toast small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast .tm{flex:none;align-self:flex-start;font-size:11px}
+/* leave */
+[hidden]{display:none!important}
+#leaveView{margin:-54px 14px 0;position:relative;z-index:2}
+#leaveView h2{margin:16px 2px 10px}
+.lv-me{display:flex;align-items:center;gap:10px;padding:12px 14px;font-size:13px;color:var(--muted)}
+.lv-me em{font-style:normal;font-size:11.5px;font-weight:700;background:var(--chip);border-radius:99px;padding:3px 9px;margin-left:auto;color:var(--brand)}
+#leaveView select,#leaveView input,#leaveView textarea{width:100%;font:inherit;color:var(--text);background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.lv-me select{flex:1;width:auto}
+.lvform{margin-top:10px}
+.lvform summary{list-style:none;cursor:pointer;padding:14px;font-weight:700;color:var(--brand)}
+.lvform summary::-webkit-details-marker{display:none}
+.lvf{padding:0 14px 14px;display:grid;gap:10px}
+.lvf label{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.lvf label>*{margin-top:4px;font-weight:400}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lverr{color:var(--neg);font-size:12.5px;min-height:0}
+.btn{border:0;border-radius:12px;background:var(--brand);color:#fff;font:inherit;font-weight:700;padding:12px}
+:root[data-theme="dark"] .btn{color:#06222b}
+.seg{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
+.seg button{flex:none;border:0;background:var(--chip);color:var(--text);border-radius:99px;padding:7px 14px;font:inherit;font-size:13px}
+.seg button.on{background:var(--brand);color:#fff}
+.lvi{padding:13px 14px;border-bottom:1px solid var(--line)}
+.lvi:last-child{border-bottom:0}
+.lvi .h{display:flex;gap:10px;align-items:center}
+.lvi .h .m{flex:1;min-width:0}
+.lvi .h b{display:block}
+.lvi small{color:var(--muted);font-size:12px}
+.lvi p{margin:8px 0 0;font-size:13.5px}
+.st{font-size:11.5px;font-weight:700;border-radius:99px;padding:3px 10px;flex:none}
+.st-Pending{background:#fef3c7;color:#92400e}.st-Approved{background:#d1fae5;color:#065f46}.st-Rejected{background:#fee2e2;color:#b91c1c}
+.lvacts{display:flex;gap:8px;margin-top:10px}
+.lvacts button{flex:1;border:0;border-radius:10px;padding:9px;font:inherit;font-weight:700}
+.lvacts .ok{background:#059669;color:#fff}.lvacts .no{background:#fee2e2;color:#b91c1c}.lvacts .del{background:var(--chip);color:var(--muted)}
+</style>
+</head>
+<body class="locked">
+<div class="toast" id="toast" hidden></div>
+<div id="loginScreen">
+ <div class="lgcard" id="lgForm">
+  <div class="lgm" id="lgMark">MAS</div>
+  <h1 id="lgTitle">MAS Digital Service</h1>
+  <p id="lgSub">Sign in to continue</p>
+  <label id="lgUserRow">Username<input type="text" id="lgUser" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
+  <label id="lgPassRow" class="lgpw">Password<input type="password" id="lgPass" autocomplete="current-password"><button type="button" id="lgShow">Show</button></label>
+  <label class="lgrem" id="lgRemRow"><input type="checkbox" id="lgRem" checked>Remember me on this device</label>
+  <div class="lgerr" id="lgErr"></div>
+  <button class="btn" id="lgBtn" type="button">Sign in</button>
+  <div class="lghint" id="lgHint">Demo accounts (replace with your real login):<br>tamil / admin123 · raja / raja123</div>
+ </div>
+</div>
+<div class="app" id="app">
+
+<header class="top" id="appHeader">
+  <svg class="art" id="headerArt" viewBox="0 0 260 200" fill="none" stroke="#fff"><circle cx="190" cy="70" r="40" stroke-opacity=".5"/><circle cx="190" cy="70" r="70" stroke-opacity=".35"/><circle cx="190" cy="70" r="100" stroke-opacity=".2"/><path d="M0 150c40-30 70 30 110 0s70-30 150 10" stroke-opacity=".5" stroke-width="2"/><g fill="#fff" stroke="none" opacity=".6"><circle cx="120" cy="40" r="3"/><circle cx="150" cy="110" r="2.5"/><circle cx="235" cy="150" r="3.5"/></g></svg>
+  <div class="brand" id="brand">
+    <svg class="logo" id="logo" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff" stroke="#38bdf8" stroke-width="3"/><path d="M12 30l6-13 6 9 6-9 6 13" fill="none" stroke="#e11d74" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="33" width="26" height="3.5" rx="1.7" fill="#f59e0b"/></svg>
+    <div id="brandText">
+      <h1 id="appTitle">MAS Digital Service</h1>
+      <p id="sub"></p>
+    </div>
+    <div class="acts" id="headerActions">
+      <button class="ibtn" id="bellBtn" aria-label="Notifications" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><i class="badge" id="badge"></i></button>
+      <button class="avatar" id="avBtn" aria-label="User menu" aria-expanded="false"></button>
+    </div>
+  </div>
+</header>
+
+<div id="reportView">
+<div class="hero" id="hero"></div>
+
+<div class="kpis" id="kpis"></div>
+
+<section id="sales">
+  <h2 id="salesTitle">Last 5 days <em id="salesHint">tap a day for details</em></h2>
+  <div class="days" id="days"></div>
+  <div class="card" id="detail"></div>
+  <div class="card chartcard" id="chartCard" style="margin-top:10px"><svg id="chart" viewBox="0 0 300 226"></svg><div class="cl" id="chartLegend"><span><b style="background:var(--cash)"></b>Cash</span><span><b style="background:var(--digital)"></b>Digital</span><span><b style="background:var(--wallet)"></b>Wallet</span><span><b style="background:var(--pending)"></b>Pending</span><span><b style="background:var(--expense)"></b>Expense</span></div></div>
+  <details class="card cmp" id="cmpBox">
+    <summary id="cmpSummary">Compare all 5 days</summary>
+    <div class="scroll" id="cmpScroll"><table id="cmp"></table></div>
+  </details>
+</section>
+
+<section id="pending">
+  <h2 id="pendingTitle">Pending payments <em id="pendTotal"></em></h2>
+  <div class="card" id="pendList"></div>
+</section>
+
+<section id="expenses">
+  <h2 id="expensesTitle">Expenses <em id="expTotal"></em></h2>
+  <div class="card" id="expList"></div>
+</section>
+
+<section id="todo">
+  <h2 id="todoTitle">To-do <em id="todoCount"></em></h2>
+  <div class="card" id="todoList"></div>
+</section>
+
+<footer id="foot"></footer>
+</div>
+
+<div id="leaveView" hidden>
+ <div class="card lv-me" id="lvMeCard"><span>Signed in as</span><b id="lvMeName" style="flex:1;color:var(--text)"></b><em id="lvRole"></em></div>
+ <details class="card lvform" id="lvBox"><summary id="lvSummary">＋ Apply leave / permission</summary>
+  <div class="lvf" id="lvFormBody">
+   <label id="lvEmpRow">Employee<select id="lvEmp"></select></label>
+   <label>Type<select id="lvType"><option>Leave</option><option>Half day</option><option>Permission</option></select></label>
+   <div class="two"><label>Date<input type="date" id="lvFrom"></label><label id="lvToRow">To<input type="date" id="lvTo"></label></div>
+   <div class="two" id="lvTimeRow" hidden><label>Time from<input type="time" id="lvT1" value="10:00"></label><label>Time to<input type="time" id="lvT2" value="12:00"></label></div>
+   <label id="lvSessRow" hidden>Session<select id="lvSess"><option>Morning</option><option>Afternoon</option></select></label>
+   <label>Reason<textarea id="lvReason" rows="2"></textarea></label>
+   <div class="lverr" id="lvErr"></div>
+   <button class="btn" id="lvSubmit">Submit request</button>
+  </div>
+ </details>
+ <h2 id="lvTitle"></h2>
+ <div class="seg" id="lvSeg"></div>
+ <div class="card" id="lvList"></div>
+</div>
+</div>
+
+<div class="pop" id="notifPop"><h3 id="ntTitle">Notifications <small id="ntSub"></small></h3><div id="ntList"></div></div>
+<div class="pop" id="userPop"><div class="who"><span class="avatar" id="avBig"></span><div><b id="uName"></b><small id="uRole">MAS Digital Service</small></div></div><button class="row2" id="themeBtn"><span>Dark / light mode</span><span>◐</span></button><button class="row2" id="installBtn" hidden><span>Install app</span><span>⬇</span></button><button class="row2" id="alertBtn"><span>Phone alerts</span><span id="alertState">Off</span></button><button class="row2 out" id="logoutBtn"><span>Log out</span><span>⎋</span></button></div>
+
+<nav id="bottomNav"><div class="in" id="bottomNavIn">
+  <a href="#top" class="on" id="navSummary" data-s="top"><span>📊</span>Summary</a>
+  <a href="#sales" id="navSales" data-s="sales"><span>📈</span>Sales</a>
+  <a href="#pending" id="navPending" data-s="pending"><span>💰</span>Pending</a>
+  <a href="#expenses" id="navExpenses" data-s="expenses"><span>🧾</span>Expense</a>
+  <a href="#todo" id="navTodo" data-s="todo"><span>✅</span>To-do</a>
+  <a href="#leave" id="navLeave" data-s="leave"><span>🗓️</span>Leave</a>
+</div></nav>
+
+<script>
+/* =====================================================================
+   DUMMY DATA — everything the page shows comes from the variables in this
+   block. In the real app, fill them from your cloud/API before the code
+   below runs (or overwrite them after fetching), nothing else needs editing.
+   ===================================================================== */
+
+/* 1. APP SETTINGS */
+var APP = {
+  name: "MAS Digital Service",            // shown in header, login screen, WhatsApp share, page title
+  reportLabel: "Day sale",                // sub-title under the name
+  walletChannels: ["DWallet","StarEC","IPBC","ESevai","AirTel","PayTM","JIO","TPlay"],  // channels counted as Wallet in charts (all other channels = Digital)
+  demoHint: "tamil / admin123 · raja / raja123",   // text under the login button; set "" to hide
+  toastSeconds: 6,                        // how long the alert banner stays
+  syncSeconds: 4                          // how often leave alerts are checked
+};
+
+/* 2. NOTIFICATION SOURCES (leave "" to disable) */
+var NOTIFY = {
+  pollUrl: "",        // e.g. "https://yourserver/api/notifications"  (checked every pollSeconds)
+  pollSeconds: 15,
+  sseUrl: "",         // e.g. "https://yourserver/api/notifications/stream"  (Server-Sent Events)
+  wsUrl: "",          // e.g. "wss://yourserver/notifications"  (WebSocket)
+  readUrl: "",        // optional: POST {ids:[...]} when the user opens the bell
+  maxItems: 30
+};
+
+/* 3. LOGIN USERS (role: "admin" sees the full leave queue; "user" sees only their own).
+      Demo only — real passwords must be checked on your server, never stored in the page. */
+var USERS = [
+  {id:1, name:"Tamil",   role:"admin", user:"tamil",   pass:"admin123"},
+  {id:2, name:"Raja",    role:"user",  user:"raja",    pass:"raja123"},
+  {id:3, name:"Antony",  role:"user",  user:"antony",  pass:"antony123"},
+  {id:4, name:"Arnold",  role:"user",  user:"arnold",  pass:"arnold123"}
+];
+
+/* 4. LEAVE / PERMISSION REQUESTS  (type: Leave | Half day | Permission; status: Pending | Approved | Rejected) */
+var LEAVE_REQUESTS = [
+  {id:1, uid:2, type:"Leave",      from:"2026-10-08", to:"2026-10-09", reason:"Family function", status:"Pending"},
+  {id:2, uid:3, type:"Permission", from:"2026-10-07", to:"2026-10-07", t1:"15:00", t2:"17:00", reason:"Bank work", status:"Pending"},
+  {id:3, uid:4, type:"Half day",   from:"2026-10-03", to:"2026-10-03", sess:"Morning", reason:"Not well", status:"Approved"}
+];
+
+/* 5. DAY REPORT — the cloud response, exactly as the API returns it (this copy is daily_report_2026-10-08.json).
+      Replace DAILY_JSON with the fetched response; buildReport() turns it into what the page draws. */
+var DAILY_JSON = {
+    "business": "MAS DIGITAL SERVICE",
+    "report": "Daily Reports",
+    "date": "2026-10-08",
+    "generatedBy": "TAMIL",
+    "generatedAt": "2026-10-08T17:17:02",
+    "currency": "INR",
+    "daySaleSummary": {
+      "cash": 26430,
+      "digital": 29873,
+      "wallet": 45634,
+      "pending": 331809,
+      "expense": 0,
+      "total": 433746,
+      "totalSales": 316
+    },
+    "last5DaySales": [
+      {
+        "date": "2026-10-08",
+        "DigiPay": 296, "DWallet": 298, "StarEC": 443, "SBI": 100, "SBI(J)": 1551,
+        "IndBank": 12438, "INBA": 3701, "IPPB": 2200, "IPBC": 42802, "Canara": 4458,
+        "City": 5129, "ESevai": 372, "AirTel": 684, "PayTM": 249, "JIO": 11, "TPlay": 775,
+        "Cash": 26430, "Pending": 331809, "Expense": 0, "Total": 433746
+      },
+      {
+        "date": "2026-10-07",
+        "DigiPay": 296, "DWallet": 395, "StarEC": 485, "SBI": 3450, "SBI(J)": 715,
+        "IndBank": 12438, "INBA": 520, "IPPB": 5311, "IPBC": 5531, "Canara": 0,
+        "City": 607, "ESevai": 420, "AirTel": 1065, "PayTM": 526, "JIO": 11, "TPlay": 60,
+        "Cash": 68230, "Pending": 333370, "Expense": 0, "Total": 433430
+      },
+      {
+        "date": "2026-10-06",
+        "DigiPay": 296, "DWallet": 395, "StarEC": 133, "SBI": 12437, "SBI(J)": 2585,
+        "IndBank": 12438, "INBA": 1877, "IPPB": 429, "IPBC": 6604, "Canara": 0,
+        "City": 1673, "ESevai": 100, "AirTel": 1581, "PayTM": 24, "JIO": 11, "TPlay": 42,
+        "Cash": 58230, "Pending": 333070, "Expense": 370, "Total": 432295
+      },
+      {
+        "date": "2026-10-05",
+        "DigiPay": 296, "DWallet": 395, "StarEC": 679, "SBI": 13737, "SBI(J)": 1209,
+        "IndBank": 12438, "INBA": 119, "IPPB": 5180, "IPBC": 361, "Canara": 0,
+        "City": 555, "ESevai": 316, "AirTel": 114, "PayTM": 158, "JIO": 11, "TPlay": 42,
+        "Cash": 64580, "Pending": 331568, "Expense": 300, "Total": 432058
+      },
+      {
+        "date": "2026-10-04",
+        "DigiPay": 296, "DWallet": 395, "StarEC": 1524, "SBI": 827, "SBI(J)": 3217,
+        "IndBank": 10688, "INBA": 54, "IPPB": 988, "IPBC": 4353, "Canara": 0,
+        "City": 18672, "ESevai": 328, "AirTel": 401, "PayTM": 365, "JIO": 11, "TPlay": 42,
+        "Cash": 55600, "Pending": 332093, "Expense": 0, "Total": 429854
+      }
+    ],
+    "pendingPayments": {
+      "netPending": -1056,
+      "items": [
+        { "id": 62, "customer": "Kaliyaperumal", "credit": 15500, "debit": 15500, "pending": 0, "totalPending": 13895 },
+        { "id": 21, "customer": "South VAO", "credit": 5000, "debit": 5000, "pending": 0, "totalPending": 5578 },
+        { "id": 17, "customer": "Antony Society", "credit": 230, "debit": 986, "pending": -756, "totalPending": 0 },
+        { "id": 143, "customer": "Anthonimary", "credit": 0, "debit": 300, "pending": -300, "totalPending": 0 }
+      ]
+    },
+    "activeTodoList": {
+      "count": 2,
+      "items": [
+        { "task": "Martin Water Bill 600", "createdDate": "2026-06-05T13:24:21", "status": "Active" },
+        { "task": "thathuva john 500", "createdDate": "2026-05-03T12:43:31", "status": "Active" }
+      ]
+    }
+  };
+
+function buildReport(j){
+  var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function d(s){var p=String(s).slice(0,10).split("-");return p[2]+"-"+M[+p[1]-1]+"-"+p[0]}
+  var SKIP={date:1,Cash:1,Pending:1,Expense:1,Total:1};                       // every other key of a day = a payment channel
+  var ch=Object.keys(j.last5DaySales[0]).filter(function(k){return !SKIP[k]});
+  var g=new Date(j.generatedAt),h=g.getHours(),sm=j.daySaleSummary;
+  var at=(g.getMonth()+1)+"/"+g.getDate()+"/"+g.getFullYear()+" "+((h%12)||12)+":"+("0"+g.getMinutes()).slice(-2)+":"+("0"+g.getSeconds()).slice(-2)+" "+(h<12?"AM":"PM");
+  return {
+    date:d(j.date), generatedBy:j.generatedBy, generatedAt:at,
+    summary:{cash:sm.cash,digital:sm.digital,wallet:sm.wallet,pending:sm.pending,expense:sm.expense,total:sm.total,totalSales:sm.totalSales},
+    channels:ch,
+    days:j.last5DaySales.map(function(x){return {date:d(x.date),v:ch.map(function(k){return x[k]||0}),cash:x.Cash,pending:x.Pending,expense:x.Expense,total:x.Total}}),
+    pendingPayments:((j.pendingPayments||{}).items||[]).map(function(r){return {id:r.id,name:r.customer,credit:r.credit,debit:r.debit,pending:r.pending,total:r.totalPending}}),
+    expenses:(j.expenses&&j.expenses.items||j.expenses||[]).map(function(e){return {category:e.category,amount:e.amount,count:e.count,description:e.description}}),
+    todos:((j.activeTodoList||{}).items||[]).map(function(t){return {task:t.task,created:String(t.createdDate).replace("T"," ")}})
+  };
+}
+var REPORT = buildReport(DAILY_JSON);
+
+/* ===== helpers ===== */
+var $ = function(id){return document.getElementById(id)};
+function inr(n){var s=Math.abs(Math.round(n)).toString(),l=s.slice(-3),r=s.slice(0,-3);
+  if(r)l=r.replace(/\B(?=(\d{2})+(?!\d))/g,",")+","+l;return (n<0?"-":"")+"₹"+l}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function short(d){var p=d.split("-");return p[0]+" "+p[1]}
+function sum(a){return a.reduce(function(x,y){return x+y},0)}
+var S = REPORT.summary;
+
+/* header + hero */
+document.title = APP.name+" - "+APP.reportLabel;
+$("appTitle").textContent = APP.name; $("lgTitle").textContent = APP.name;
+$("lgHint").hidden = !APP.demoHint;
+if(APP.demoHint) $("lgHint").innerHTML = "Demo accounts (replace with your real login):<br>"+esc(APP.demoHint);
+$("sub").textContent = APP.reportLabel+" · "+REPORT.date;
+var prev = REPORT.days[1], today = REPORT.days[0];
+var diff = prev ? today.total - prev.total : 0;
+var parts = [["Cash",S.cash,"var(--cash)"],["Digital",S.digital,"var(--digital)"],["Wallet",S.wallet,"var(--wallet)"],["Pending",S.pending,"var(--pending)"]];
+var ptot = sum(parts.map(function(p){return p[1]}));
+$("hero").innerHTML =
+  '<div class="hrow" id="heroRow"><div class="hl" id="heroLeft"><div class="lbl" id="heroLabel">Total for '+REPORT.date+'</div>'+
+  '<div class="big num" id="heroTotal">'+inr(S.total)+'</div>'+
+  (prev?'<span id="heroDelta" class="delta '+(diff>=0?'up':'down')+'">'+(diff>=0?'▲ ':'▼ ')+inr(Math.abs(diff))+' vs '+short(prev.date)+'</span>':'')+
+  '</div><svg class="donut" viewBox="0 0 120 120" id="donut"></svg></div>';
+(function(){
+  var seg=[["Cash",S.cash,"var(--cash)"],["Digital",S.digital,"var(--digital)"],["Wallet",S.wallet,"var(--wallet)"]],t=sum(seg.map(function(x){return x[1]})),C=2*Math.PI*44,off=0,h='<defs><path id="dpt" d="M60 19A41 41 0 0 1 60 101A41 41 0 0 1 60 19"/><path id="dpb" d="M60 107A47 47 0 0 0 60 13A47 47 0 0 0 60 107"/></defs><circle cx="60" cy="60" r="44" fill="none" stroke="var(--chip)" stroke-width="16"/>',L='';
+  seg.forEach(function(x,i){var l=x[1]/t*C;h+='<circle data-i="'+i+'" cx="60" cy="60" r="44" fill="none" stroke="'+x[2]+'" stroke-width="16" stroke-dasharray="'+Math.max(l-2,0)+' '+C+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 60 60)"/>';
+    if(x[1]/t>.06){var th=(off+l/2)/C*360,bot=th>90&&th<270,off2=bot?((180-th+360)%360)/360*2*Math.PI*47:th/360*2*Math.PI*41;
+      L+='<text font-size="8.5" font-weight="700" style="fill:#fff;pointer-events:none"><textPath href="#'+(bot?'dpb':'dpt')+'" startOffset="'+off2.toFixed(1)+'">'+Math.round(x[1]/t*100)+'%</textPath></text>'}
+    off+=l});
+  function ctr(a,b){return h+L+'<text x="60" y="56" font-size="9" style="fill:var(--muted)">'+a+'</text><text x="60" y="71" font-size="14" font-weight="800">'+b+'</text>'}
+  var d=$("donut");d.innerHTML=ctr("Collected",inr(t));
+  /* tap a ring segment to see its name and amount in the centre; tap elsewhere to reset */
+  d.onclick=function(e){var i=e.target.getAttribute("data-i");d.innerHTML=i===null?ctr("Collected",inr(t)):ctr(seg[+i][0],inr(seg[+i][1]))};
+})();
+
+/* KPI cards (colours match the PDF) */
+var IC={Cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',Digital:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',Wallet:'<path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7zM3 7l12-4v4"/><circle cx="16.5" cy="13.5" r=".8"/>',Pending:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',Expense:'<path d="M12 4v14M6 12l6 6 6-6"/>',"Total sales":'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>'};
+var kp = [["Cash",S.cash,"--cash"],["Digital",S.digital,"--digital"],["Wallet",S.wallet,"--wallet"],["Pending",S.pending,"--pending"],["Expense",S.expense,"--expense"],["Total sales",S.totalSales,"--sales"]];
+$("kpis").innerHTML = kp.map(function(k){
+  return '<div class="kpi" style="background-color:var('+k[2]+')"><span class="ic"><svg viewBox="0 0 24 24">'+IC[k[0]]+'</svg></span><small>'+k[0]+'</small><strong class="num">'+inr(k[1])+'</strong></div>'}).join("");
+
+/* day chips */
+var cur = 0;
+$("days").innerHTML = REPORT.days.map(function(d,i){
+  return '<button class="day" data-i="'+i+'"><small>'+(i===0?"Today":short(d.date).split(" ")[0]+" "+short(d.date).split(" ")[1])+'</small><b class="num">'+inr(d.total)+'</b></button>'}).join("");
+$("days").addEventListener("click",function(e){var b=e.target.closest(".day");if(b){cur=+b.dataset.i;renderDay()}});
+
+/* stacked bar chart per day, newest first */
+(function(){
+  var WAL=APP.walletChannels; /* channels counted as Wallet */
+  var d=REPORT.days.map(function(x){var w=0,g=0;REPORT.channels.forEach(function(n,i){if(WAL.indexOf(n)>=0)w+=x.v[i];else g+=x.v[i]});
+    return {l:short(x.date),c:x.cash,g:g,w:w,p:x.pending,e:x.expense}});
+  /* one stacked bar per day: cash + digital + wallet + pending + expense */
+  var mx=Math.max.apply(0,d.map(function(x){return x.c+x.g+x.w+x.p+x.e})),W=300,bw=30,gap=(W-d.length*bw)/(d.length+1),h='',B=118,K=84;
+  [0,.5,1].forEach(function(f){var y=B-f*K;h+='<line x1="0" x2="300" y1="'+y+'" y2="'+y+'" stroke="var(--line)" stroke-dasharray="3 4"/>'});
+  d.forEach(function(x,i){var X=gap+i*(bw+gap),cx=X+bw/2,y=B,tot=x.c+x.g+x.w+x.p+x.e;
+    [[x.c,"var(--cash)"],[x.g,"var(--digital)"],[x.w,"var(--wallet)"],[x.p,"var(--pending)"],[x.e,"var(--expense)"]].forEach(function(s){if(!s[0])return;var hh=Math.max(s[0]/mx*K,1.5);y-=hh;h+='<rect x="'+X+'" y="'+y+'" width="'+bw+'" height="'+hh+'" fill="'+s[1]+'"/>'});
+    h+='<text class="v" x="'+cx+'" y="'+(y-5)+'">'+Math.round(tot/1000)+'k</text><text '+(i===0?'class="v" ':'')+'x="'+cx+'" y="134">'+(i===0?"Today":x.l)+'</text>';
+    /* value rows under each day */
+    [[x.c,"var(--cash)"],[x.g,"var(--digital)"],[x.w,"var(--wallet)"],[x.p,"var(--pending)"],[x.e,"var(--expense)"]].forEach(function(s,j){var ty=152+j*16;
+      h+='<rect x="'+(cx-27)+'" y="'+(ty-7)+'" width="6" height="6" rx="2" fill="'+s[1]+'"/><text x="'+(cx-18)+'" y="'+ty+'" style="text-anchor:start;fill:var(--text)">'+s[0].toLocaleString("en-IN")+'</text>'})});
+  $("chart").innerHTML=h;
+})();
+
+/* day detail */
+var PAL=["#06b6d4","#8b5cf6","#f59e0b","#10b981","#ef4444","#3b82f6","#ec4899","#7c2d12"];
+function renderDay(){
+  var d=REPORT.days[cur];
+  Array.prototype.forEach.call(document.querySelectorAll(".day"),function(b,i){b.classList.toggle("on",i===cur)});
+  var rows=REPORT.channels.map(function(n,i){return {n:n,v:d.v[i]}});
+  var nz=rows.filter(function(r){return r.v>0}).sort(function(a,b){return b.v-a.v});
+  var zr=rows.filter(function(r){return r.v===0});
+  var mx=nz.length?nz[0].v:1;
+  $("detail").innerHTML =
+    '<div class="sumline c" id="daySummary">'+[["Cash",d.cash,"--cash"],["Pending",d.pending,"--pending"],["Expense",d.expense,"--expense"]].map(function(k){return '<div style="--c:var('+k[2]+')"><small>'+k[0]+'</small><b class="num">'+inr(k[1])+'</b></div>'}).join("")+'</div>'+
+
+
+    '<div class="cg" id="channelGrid">'+nz.concat(zr).map(function(r,i){var z=r.v===0,c=PAL[i%PAL.length];return '<div class="ct'+(z?' z':'')+'"><span class="chip"'+(z?'':' style="background:'+c+'"')+'>'+esc(r.n.slice(0,2))+'</span><small>'+esc(r.n)+'</small><b class="num">'+inr(r.v)+'</b>'+(z?'<div class="note">No records</div>':'<div class="bar"><i style="width:'+(r.v/mx*100).toFixed(1)+'%;background:'+c+'"></i></div>')+'</div>'}).join("")+((nz.length+zr.length)%2?'<div class="ct"></div>':"")+'</div>'+
+    '<div class="sumline" id="dayTotalBox" style="border-top:1px solid var(--line);border-bottom:0;grid-template-columns:1fr"><div><small>Day total</small><b class="num" style="color:var(--total);font-size:18px">'+inr(d.total)+'</b></div></div>';
+}
+renderDay();
+
+/* compare table: channels as rows, days as columns */
+(function(){
+  var h='<thead><tr><th>Channel</th>'+REPORT.days.map(function(d){return '<th>'+short(d.date)+'</th>'}).join("")+'</tr></thead><tbody>';
+  REPORT.channels.forEach(function(n,i){
+    if(REPORT.days.every(function(d){return d.v[i]===0}))return;
+    h+='<tr><td>'+esc(n)+'</td>'+REPORT.days.map(function(d){return '<td class="num">'+d.v[i].toLocaleString("en-IN")+'</td>'}).join("")+'</tr>'});
+  [["Cash","cash"],["Pending","pending"],["Expense","expense"],["Total","total"]].forEach(function(r){
+    h+='<tr><td><b>'+r[0]+'</b></td>'+REPORT.days.map(function(d){return '<td class="num"><b>'+d[r[1]].toLocaleString("en-IN")+'</b></td>'}).join("")+'</tr>'});
+  $("cmp").innerHTML=h+'</tbody>';
+})();
+
+/* pending */
+var pt = sum(REPORT.pendingPayments.map(function(p){return p.pending}));
+$("pendTotal").textContent = "Net "+inr(pt);
+$("pendList").innerHTML = REPORT.pendingPayments.map(function(p){
+  var c=p.pending>=0?"pos":"neg";
+  return '<div class="p"><div class="ph"><div class="av" style="background:linear-gradient(135deg,hsl('+(p.id*47%360)+',70%,55%),hsl('+(p.id*47%360+40)+',70%,40%));color:#fff">'+esc(p.name.charAt(0))+'</div><div class="m"><b>'+esc(p.name)+'</b><small>ID '+p.id+'</small></div>'+
+    '<div class="a"><b class="num '+c+'">'+inr(p.pending)+'</b><small>Total pending '+inr(p.total)+'</small></div></div>'+
+    '<div class="pg"><div class="cr'+(p.credit?'':' z')+'"><span>Credit</span><b class="num">'+inr(p.credit)+'</b></div><div class="db'+(p.debit?'':' z')+'"><span>Debit</span><b class="num">'+inr(p.debit)+'</b></div></div></div>'}).join("");
+
+/* expenses */
+var et = sum(REPORT.expenses.map(function(e){return e.amount}));
+$("expTotal").textContent = inr(et);
+$("expList").innerHTML = REPORT.expenses.map(function(e){
+  return '<div class="exp"><div><b>'+esc(e.description)+'</b><span class="tag">'+esc(e.category)+'</span><small>Count: '+e.count+'</small></div><b class="num">'+inr(e.amount)+'</b></div>'}).join("");
+
+/* todo */
+$("todoCount").textContent = REPORT.todos.length+" active";
+var ref = new Date("2026-10-06T00:00:00");
+$("todoList").innerHTML = REPORT.todos.map(function(t){
+  var dt=new Date(t.created.replace(" ","T")), days=Math.max(0,Math.floor((ref-dt)/864e5));
+  var cls=days>=30?"old":days>=7?"mid":"", label=days===0?"Today":days===1?"1 day":days<60?days+" days":Math.floor(days/30)+" months";
+  return '<div class="todo"><span class="dot"></span><div><b>'+esc(t.task)+'</b><small>Created '+esc(t.created.slice(0,16))+'</small></div><span class="age '+cls+'">'+label+'</span></div>'}).join("");
+
+$("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generatedAt;
+
+/* ===== NOTIFICATIONS (real-time) — settings are in the NOTIFY block at the top of this script ===== */
+(function(){
+
+  var TY={pending:["#f59e0b","₹"],expense:["#ef4444","▾"],todo:["#06b6d4","☑"],up:["#059669","▲"],down:["#dc2626","▼"],alert:["#e11d74","!"],info:["#3b82f6","i"],sale:["#25d366","₹"]};
+  var items=[], serverCount=null, read={};
+  try{read=JSON.parse(localStorage.getItem("mas_read")||"{}")}catch(e){}
+  function save(){try{localStorage.setItem("mas_read",JSON.stringify(read))}catch(e){}}
+  function rel(t){var m=Math.floor((Date.now()-t)/6e4);return m<1?"just now":m<60?m+" min ago":m<1440?Math.floor(m/60)+" h ago":Math.floor(m/1440)+" d ago"}
+  function unread(){return items.filter(function(n){return !read[n.id]}).length}
+  function norm(n){var t=n.time?new Date(n.time).getTime():NaN;
+    return {id:String(n.id!=null?n.id:(n.title||"")+(n.time||"")),type:TY[n.type]?n.type:"info",title:n.title||"",text:n.text||"",time:isNaN(t)?Date.now():t}}
+
+  var np=$("notifPop"),up=$("userPop"),bell=$("bellBtn");
+  function render(){
+    var c=serverCount!=null?serverCount:unread(), b=$("badge");
+    b.textContent=c>0?(c>99?"99+":c):"";
+    $("ntSub").textContent=c>0?c+" new":"All caught up";
+    $("ntList").innerHTML=items.length?items.map(function(n){var t=TY[n.type];
+      return '<div class="nt"><span class="d" style="background:'+t[0]+'">'+t[1]+'</span><div style="flex:1"><b>'+esc(n.title)+'</b><small>'+esc(n.text)+'</small></div><small class="tm">'+rel(n.time)+'</small>'+(read[n.id]?'':'<i class="nd"></i>')+'</div>'}).join("")
+      :'<div class="nt"><small>No notifications yet.</small></div>';
+  }
+  function ring(){bell.classList.remove("ring");void bell.offsetWidth;bell.classList.add("ring");$("badge").classList.remove("pulse");void $("badge").offsetWidth;$("badge").classList.add("pulse")}
+
+  /* WhatsApp-style heads-up banner; when the app is in the background it also uses the phone's own notification if allowed */
+  var tt;
+  function banner(n){
+    if(document.body.classList.contains("locked"))return;
+    var t=TY[n.type]||TY.info,el=$("toast");
+    el.innerHTML='<span class="d" style="background:'+t[0]+'">'+t[1]+'</span><div style="flex:1;min-width:0"><b>'+esc(n.title)+'</b><small>'+esc(n.text)+'</small></div><small class="tm">now</small>';
+    el.hidden=false;el.classList.remove("in");void el.offsetWidth;el.classList.add("in");
+    try{if(navigator.vibrate)navigator.vibrate(120)}catch(e){}
+    if(document.hidden&&window.Notification&&Notification.permission==="granted"){try{new Notification(n.title,{body:n.text})}catch(e){}}
+    clearTimeout(tt);tt=setTimeout(function(){el.hidden=true},APP.toastSeconds*1000);
+  }
+  $("toast").onclick=function(e){e.stopPropagation();this.hidden=true;$("bellBtn").click()};
+  window.MASBanner=banner;
+
+  /* add or update notifications; new ones raise the live count */
+  function push(list){
+    list=(Array.isArray(list)?list:[list]).map(norm);var fresh=0,fl=[];
+    list.forEach(function(n){var i=items.findIndex(function(x){return x.id===n.id});
+      if(i<0){items.unshift(n);if(!read[n.id]){fresh++;fl.push(n)}}else items[i]=n});
+    items.sort(function(a,b){return b.time-a.time});items=items.slice(0,NOTIFY.maxItems);
+    if(fresh){serverCount=null;ring()}
+    if(fl.length){fl.sort(function(a,b){return b.time-a.time});banner({type:fl[0].type,title:fl[0].title,text:fl[0].text+(fl.length>1?"  (+"+(fl.length-1)+" more)":"")})}
+    render();
+  }
+  function setCount(n){serverCount=Math.max(0,+n||0);render();if(serverCount>0)ring()}
+  function ingest(d){
+    if(!d)return;
+    if(typeof d==="string"){try{d=JSON.parse(d)}catch(e){return}}
+    if(Array.isArray(d))return push(d);
+    if(d.notifications)push(d.notifications);
+    if(d.count!=null)setCount(d.count);
+    if(!d.notifications&&d.count==null&&(d.title||d.text))push(d);
+  }
+
+  /* first notifications come from the report itself */
+  var old=REPORT.todos.filter(function(t){return (ref-new Date(t.created.replace(" ","T")))/864e5>=30}).length, rd=REPORT.date;
+  push([
+    {id:"pend-"+rd,type:"pending",title:REPORT.pendingPayments.length+" pending payments",text:"Net "+inr(pt)},
+    {id:"exp-"+rd,type:"expense",title:inr(et)+" expense today",text:REPORT.expenses.map(function(e){return e.description}).join(", ")},
+    {id:"todo-"+rd,type:"todo",title:old+" to-dos open over 30 days",text:REPORT.todos.length+" active in total"},
+    {id:"tot-"+rd,type:diff>=0?"up":"down",title:"Total "+(diff>=0?"up ":"down ")+inr(Math.abs(diff)),text:"vs "+short(prev.date)}
+  ]);
+
+  /* panels */
+  function close(){np.classList.remove("open");up.classList.remove("open");bell.setAttribute("aria-expanded","false");$("avBtn").setAttribute("aria-expanded","false")}
+  bell.onclick=function(e){e.stopPropagation();var o=!np.classList.contains("open");close();
+    if(o){np.classList.add("open");bell.setAttribute("aria-expanded","true");
+      var ids=items.filter(function(n){return !read[n.id]}).map(function(n){return n.id});
+      /* keep the dots visible for this view, then mark as read */
+      ids.forEach(function(i){read[i]=1});save();serverCount=null;
+      $("badge").textContent="";$("ntSub").textContent="All caught up";
+      if(NOTIFY.readUrl&&ids.length){try{fetch(NOTIFY.readUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:ids})})}catch(x){}}}};
+  $("avBtn").onclick=function(e){e.stopPropagation();var o=!up.classList.contains("open");close();if(o){up.classList.add("open");this.setAttribute("aria-expanded","true")}};
+  document.addEventListener("click",function(e){if(!e.target.closest(".pop")){var was=np.classList.contains("open");close();if(was)render()}});
+  setInterval(function(){if(!np.classList.contains("open"))render()},30000);
+
+  /* ---- live sources ---- */
+  function poll(){fetch(NOTIFY.pollUrl,{cache:"no-store"}).then(function(r){return r.json()}).then(ingest).catch(function(){})}
+  if(NOTIFY.pollUrl){poll();setInterval(poll,Math.max(5,NOTIFY.pollSeconds)*1000);
+    document.addEventListener("visibilitychange",function(){if(!document.hidden)poll()})}
+  if(NOTIFY.sseUrl&&window.EventSource){var es=new EventSource(NOTIFY.sseUrl);es.onmessage=function(e){ingest(e.data)}}
+  if(NOTIFY.wsUrl&&window.WebSocket){(function open(tries){var ws=new WebSocket(NOTIFY.wsUrl);
+    ws.onmessage=function(e){ingest(e.data)};ws.onopen=function(){tries=0};
+    ws.onclose=function(){setTimeout(function(){open(Math.min(tries+1,6))},Math.min(30000,1000*Math.pow(2,tries)))}})(0)}
+
+  /* ---- hooks for the mobile app (Android / iOS / Flutter WebView) ----
+     webView.evaluateJavascript("MASReport.push({id:'n1',type:'alert',title:'New payment',text:'Raja K paid ₹500'})")
+     webView.evaluateJavascript("MASReport.setCount(3)")                                                 */
+  window.MASReport={push:push,setCount:setCount,ingest:ingest,drop:function(pfx){items=items.filter(function(n){return n.id.indexOf(pfx)!==0});render()},
+    simulate:function(){push({id:"sim-"+Date.now(),type:"alert",title:"New payment received",text:"Raja K paid ₹500"})}};
+  render();
+})();
+
+/* theme toggle */
+$("themeBtn").onclick=function(){
+  var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+  r.dataset.theme=dark?"light":"dark";
+  var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=dark?"#0e7490":"#0b141a";
+};
+
+/* bottom nav highlight */
+var links=document.querySelectorAll("nav a");
+/* scroll spy: highlight the last section whose top has passed 40% of the screen (works for tall sections like Sales) */
+var spyIds=["sales","pending","expenses","todo"];
+function spy(){
+  if(view==="leave")return;
+  var cur="top",line=innerHeight*.4;
+  spyIds.forEach(function(id){if($(id).getBoundingClientRect().top<=line)cur=id});
+  if(scrollY<120)cur="top";
+  else if(scrollY+innerHeight>=document.documentElement.scrollHeight-4)cur="todo";
+  links.forEach(function(a){a.classList.toggle("on",a.dataset.s===cur)});
+}
+window.addEventListener("scroll",spy,{passive:true});
+window.addEventListener("resize",spy);
+
+/* ===== LEAVE / PERMISSION =====
+   Replace LV.users / LV.reqs / save+load with your app's login + API. role "admin" sees the full queue. */
+var LV={users:USERS,reqs:LEAVE_REQUESTS.slice(),me:1,f:"Pending"};
+try{var sv=JSON.parse(localStorage.getItem("mas_leave")||"null");if(sv){LV.reqs=sv.reqs}}catch(e){}
+function lvSave(){try{localStorage.setItem("mas_leave",JSON.stringify({reqs:LV.reqs,me:LV.me}))}catch(e){}}
+function lvNotes(){try{return JSON.parse(localStorage.getItem("mas_lvnotes")||"[]")}catch(e){return[]}}
+function lvNotify(to,type,title,text){var a=lvNotes();a.push({id:"lv-"+Date.now()+"-"+to+"-"+a.length,to:to,type:type,title:title,text:text,time:new Date().toISOString()});
+  try{localStorage.setItem("mas_lvnotes",JSON.stringify(a.slice(-100)))}catch(e){}}
+var LVQ="";
+function lvSync(){ /* push this user's leave notifications into the bell; admins also get a "requests waiting" alert */
+  if(!window.MASReport||document.body.classList.contains("locked"))return;
+  var me=uById(LV.me),m=lvNotes().filter(function(n){return n.to===me.id});if(m.length)MASReport.push(m);
+  if(me.role==="admin"){var n=LV.reqs.filter(function(r){return r.status==="Pending"}).length,id="lv-queue-"+n;
+    if(id!==LVQ){MASReport.drop("lv-queue");LVQ=id;if(n>0)MASReport.push({id:id,type:"alert",title:n+" leave request"+(n>1?"s":"")+" waiting",text:"Open the Leave tab to approve or reject"})}}}
+function uById(i){return LV.users.filter(function(u){return u.id===i})[0]}
+function dfmt(s){return new Date(s+"T00:00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"short"})}
+function lvWhen(r){var s=dfmt(r.from)+(r.to!==r.from?" – "+dfmt(r.to):"");
+  if(r.type==="Permission")s+=" · "+r.t1+"–"+r.t2;if(r.type==="Half day")s+=" · "+r.sess;return s}
+function opts(a){return a.map(function(u){return '<option value="'+u.id+'">'+esc(u.name)+'</option>'}).join("")}
+function lvRender(){
+  var me=uById(LV.me),adm=me.role==="admin";
+  $("lvMeName").textContent=me.name;$("lvRole").textContent=adm?"Admin":"Staff";
+  $("lvEmp").innerHTML=opts(LV.users);$("lvEmp").value=me.id;$("lvEmpRow").hidden=!adm;
+  var all=LV.reqs.filter(function(r){return adm||r.uid===me.id}).sort(function(a,b){return b.id-a.id});
+  var n=function(s){return all.filter(function(r){return r.status===s}).length};
+  $("lvTitle").textContent=adm?"Leave queue":"My requests";
+  $("lvSeg").innerHTML=["Pending","Approved","Rejected","All"].map(function(f){
+    return '<button data-f="'+f+'" class="'+(LV.f===f?"on":"")+'">'+f+(f==="All"?"":" ("+n(f)+")")+'</button>'}).join("");
+  var list=all.filter(function(r){return LV.f==="All"||r.status===LV.f});
+  $("lvList").innerHTML=list.length?list.map(function(r){
+    var u=uById(r.uid),acts="";
+    if(r.status==="Pending"&&adm)acts='<div class="lvacts"><button class="ok" data-a="ok" data-id="'+r.id+'">Approve</button><button class="no" data-a="no" data-id="'+r.id+'">Reject</button></div>'+(LV.rej===r.id?'<div class="lvrj"><input placeholder="Reason for rejecting (optional)"><button data-a="rj" data-id="'+r.id+'">Confirm</button></div>':"");
+    else if(r.status==="Pending"&&r.uid===me.id)acts='<div class="lvacts"><button class="del" data-a="del" data-id="'+r.id+'">Cancel request</button></div>';
+    return '<div class="lvi"><div class="h"><div class="av">'+esc(u.name.charAt(0))+'</div><div class="m"><b>'+esc(u.name)+'<span class="tag">'+r.type+'</span></b><small>'+lvWhen(r)+'</small></div><span class="st st-'+r.status+'">'+r.status+'</span></div>'+
+      (r.reason?'<p>'+esc(r.reason)+'</p>':"")+(r.status!=="Pending"&&r.by?'<small class="lvby">'+r.status+' by '+esc(r.by)+(r.note?' — '+esc(r.note):"")+'</small>':"")+acts+'</div>'}).join(""):'<div class="zero" style="border:0;text-align:center">No '+(LV.f==="All"?"":LV.f.toLowerCase()+" ")+'requests</div>';
+}
+function lvType(){var t=$("lvType").value;$("lvToRow").hidden=t!=="Leave";$("lvTimeRow").hidden=t!=="Permission";$("lvSessRow").hidden=t!=="Half day"}
+function todayStr(){var d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+$("lvType").onchange=lvType;
+$("lvSeg").onclick=function(e){var b=e.target.closest("button");if(b){LV.f=b.dataset.f;lvRender()}};
+$("lvList").onclick=function(e){var b=e.target.closest("button");if(!b)return;var id=+b.dataset.id,a=b.dataset.a,me=uById(LV.me);
+  if(a==="no"){LV.rej=LV.rej===id?null:id;lvRender();return}
+  if(a==="del")LV.reqs=LV.reqs.filter(function(r){return r.id!==id});
+  else LV.reqs.forEach(function(r){if(r.id!==id)return;var ok=a==="ok";
+    if(!ok){var inp=b.parentNode.querySelector("input");r.note=inp?inp.value.trim():""}
+    r.status=ok?"Approved":"Rejected";r.by=me.name;
+    if(r.uid!==me.id)lvNotify(r.uid,ok?"up":"down",r.type+" "+(ok?"approved":"rejected"),lvWhen(r)+" · by "+me.name+(r.note?" — "+r.note:""))});
+  LV.rej=null;lvSave();lvRender();lvSync()};
+$("lvSubmit").onclick=function(){
+  var me=uById(LV.me),t=$("lvType").value,f=$("lvFrom").value,to=t==="Leave"?($("lvTo").value||f):f,err="";
+  if(!f)err="Please choose a date.";
+  else if(to<f)err="'To' date can't be before the start date.";
+  else if(t==="Permission"&&$("lvT2").value<=$("lvT1").value)err="End time must be after start time.";
+  else if(!$("lvReason").value.trim())err="Please add a reason.";
+  $("lvErr").textContent=err;if(err)return;
+  var r={id:Date.now(),uid:me.role==="admin"?+$("lvEmp").value:me.id,type:t,from:f,to:to,reason:$("lvReason").value.trim(),status:"Pending"};
+  if(t==="Permission"){r.t1=$("lvT1").value;r.t2=$("lvT2").value}
+  if(t==="Half day")r.sess=$("lvSess").value;
+  LV.reqs.push(r);
+  LV.users.forEach(function(u){if(u.role==="admin"&&u.id!==me.id)lvNotify(u.id,"alert","New "+t.toLowerCase()+" request",uById(r.uid).name+" · "+lvWhen(r))});
+  if(r.uid!==me.id)lvNotify(r.uid,"info",t+" applied for you",lvWhen(r)+" · by "+me.name);
+  lvSave();$("lvReason").value="";$("lvBox").open=false;LV.f="Pending";lvRender();lvSync()};
+$("lvFrom").value=$("lvTo").value=todayStr();lvType();
+
+/* view switching: Leave tab shows the leave page, other tabs return to the report */
+var view="report";
+function setView(v){view=v;$("reportView").hidden=v==="leave";$("leaveView").hidden=v!=="leave";
+  $("sub").textContent=v==="leave"?"Leave & permission":APP.reportLabel+" · "+REPORT.date;
+  links.forEach(function(a){a.classList.toggle("on",v==="leave"&&a.dataset.s==="leave")})}
+links.forEach(function(a){a.addEventListener("click",function(e){
+  if(a.dataset.s==="leave"){e.preventDefault();setView("leave");lvRender();scrollTo(0,0)}
+  else if(view==="leave"){setView("report");a.classList.add("on")}})});
+
+/* ===== LOGIN / LOGOUT =====
+   Demo only: credentials live in LV.users in this file, so anyone can read them. Replace check() with a call to your server.
+   "Remember me" keeps the session in localStorage until the user logs out; otherwise it lasts only for the browser tab (sessionStorage). */
+var AUTH_KEY="mas_auth";
+function getAuth(){try{var v=localStorage.getItem(AUTH_KEY)||sessionStorage.getItem(AUTH_KEY);return v?JSON.parse(v):null}catch(e){return null}}
+function setAuth(uid,rem){try{var j=JSON.stringify({uid:uid,at:Date.now()});localStorage.removeItem(AUTH_KEY);sessionStorage.removeItem(AUTH_KEY);(rem?localStorage:sessionStorage).setItem(AUTH_KEY,j);
+  if(rem)localStorage.setItem("mas_lastuser",uById(uid).user);else localStorage.removeItem("mas_lastuser")}catch(e){}}
+function clearAuth(){try{localStorage.removeItem(AUTH_KEY);sessionStorage.removeItem(AUTH_KEY)}catch(e){}}
+function check(u,p){return LV.users.filter(function(x){return x.user===u.trim().toLowerCase()&&x.pass===p})[0]}
+function applyUser(){var u=uById(LV.me),ini=u.name.charAt(0).toUpperCase();
+  $("avBtn").textContent=ini;$("avBig").textContent=ini;$("uName").textContent=u.name;
+  $("uRole").textContent=(u.role==="admin"?"Admin":"Staff")+" · "+APP.name}
+function saleCheck(){ /* a report date we have not shown before = a new day sale */
+  var last="";try{last=localStorage.getItem("mas_lastsale")||""}catch(e){}
+  if(last===REPORT.date)return;
+  try{localStorage.setItem("mas_lastsale",REPORT.date)}catch(e){}
+  MASReport.push({id:"sale-"+REPORT.date,type:"sale",title:"New day sale · "+short(REPORT.date),text:"Total "+inr(S.total)+" · Cash "+inr(S.cash)+" · Digital "+inr(S.digital)})}
+function alertLabel(){var n=window.Notification;$("alertState").textContent=!n?"Not supported":n.permission==="granted"?"On":n.permission==="denied"?"Blocked":"Off"}
+$("alertBtn").onclick=function(e){e.stopPropagation();var n=window.Notification;if(!n)return;
+  if(n.permission==="default")n.requestPermission().then(function(){alertLabel();if(n.permission==="granted")MASBanner({type:"sale",title:"Alerts are on",text:"You will be notified when a new day sale arrives"})});
+  else if(n.permission==="granted")MASBanner({type:"sale",title:"Alerts are on",text:"You will be notified when a new day sale arrives"})};
+alertLabel();
+function enter(uid){LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView("report");lvRender();lvSync();saleCheck();scrollTo(0,0);spy()}
+function showLogin(){LVQ="";MASReport.drop("lv-");document.body.classList.add("locked");$("loginScreen").hidden=false;$("lgPass").value="";$("lgErr").textContent="";
+  var last="";try{last=localStorage.getItem("mas_lastuser")||""}catch(e){}$("lgUser").value=last;$("lgRem").checked=true;
+  setTimeout(function(){(last?$("lgPass"):$("lgUser")).focus()},50)}
+$("lgShow").onclick=function(){var p=$("lgPass"),h=p.type==="password";p.type=h?"text":"password";this.textContent=h?"Hide":"Show"};
+/* no <form> element: embedded/sandboxed views block form submission, so sign-in is wired to the button and the Enter key */
+function doLogin(){
+  var u=check($("lgUser").value,$("lgPass").value);
+  if(!u){$("lgErr").textContent="Invalid username or password.";$("lgPass").value="";return}
+  setAuth(u.id,$("lgRem").checked);enter(u.id)}
+$("lgBtn").onclick=doLogin;
+["lgUser","lgPass"].forEach(function(id){$(id).addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();doLogin()}})});
+$("logoutBtn").onclick=function(){clearAuth();$("userPop").classList.remove("open");showLogin()};
+(function(){var a=getAuth(),u=a&&uById(a.uid);if(u)enter(u.id);else showLogin()})();
+setInterval(lvSync,APP.syncSeconds*1000);
+/* ===== PWA: install button + service worker ===== */
+var deferredInstall=null;
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredInstall=e;$("installBtn").hidden=false});
+window.addEventListener("appinstalled",function(){$("installBtn").hidden=true});
+$("installBtn").onclick=function(ev){ev.stopPropagation();if(!deferredInstall)return;deferredInstall.prompt();deferredInstall.userChoice.then(function(){deferredInstall=null;$("installBtn").hidden=true})};
+if("serviceWorker" in navigator&&/^https?:/.test(location.protocol))window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js")});window.addEventListener("storage",lvSync);
+</script>
+</body>
+</html>
