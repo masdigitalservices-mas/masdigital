@@ -491,12 +491,12 @@ var DAILY_JSON = {
       }
     ],
     "pendingPayments": {
-      "netPending": -1056,
+      "netPending": -8602,
       "items": [
-        { "id": 62, "customer": "Kaliyaperumal", "credit": 15500, "debit": 15500, "pending": 0, "totalPending": 13895 },
-        { "id": 21, "customer": "South VAO", "credit": 5000, "debit": 5000, "pending": 0, "totalPending": 5578 },
-        { "id": 17, "customer": "Antony Society", "credit": 230, "debit": 986, "pending": -756, "totalPending": 0 },
-        { "id": 143, "customer": "Anthonimary", "credit": 0, "debit": 300, "pending": -300, "totalPending": 0 }
+        { "id": "4",  "customer": "MAS Coin",   "credit": 0,    "debit": 250,  "pending": -250,  "totalPending": -250  },
+        { "id": "8",  "customer": "Sherly",      "credit": 1011, "debit": 2000, "pending": -989,  "totalPending": -989  },
+        { "id": "18", "customer": "Sri vidhya",  "credit": 5250, "debit": 6613, "pending": -1363, "totalPending": -1363 },
+        { "id": "55", "customer": "Raja K",      "credit": 0,    "debit": 6000, "pending": -6000, "totalPending": -6000 }
       ]
     },
     "activeTodoList": {
@@ -521,7 +521,8 @@ function buildReport(j){
       totalSales:j.last5DaySales&&j.last5DaySales.length>1?(sm.total-(j.last5DaySales[1].Total||0)+(j.last5DaySales[1].Expense||0)):sm.totalSales||0},
     channels:ch,
     days:j.last5DaySales.map(function(x){return {date:d(x.date),v:ch.map(function(k){return x[k]||0}),cash:x.Cash,pending:x.Pending,expense:x.Expense,total:x.Total}}),
-    pendingPayments:((j.pendingPayments||{}).items||[]).filter(function(r){return (r.totalPending||r.total||r.pending||0)!==0}).map(function(r,i){return {id:+r.id||i+1,name:r.customer||r.name||"",credit:r.credit||0,debit:r.debit||0,pending:r.pending||0,total:r.totalPending||r.total||0}}),
+    pendingPayments:((j.pendingPayments||{}).items||[]).filter(function(r){var t=r.totalPending!=null?r.totalPending:(r.total||0);return t!==0}).map(function(r,i){return {id:+r.id||i+1,name:r.customer||r.name||"",credit:r.credit||0,debit:r.debit||0,pending:r.pending||0,total:r.totalPending!=null?r.totalPending:(r.total||0)}}).sort(function(a,b){return Math.abs(b.total)-Math.abs(a.total)}),
+    pendingByDate:j._pendingByDate||{},
     expenses:(j.expenses&&j.expenses.items||j.expenses||[]).map(function(e){return {category:e.category,amount:e.amount,count:e.count,description:e.description}}),
     todos:((j.activeTodoList||{}).items||[]).map(function(t){return {task:t.task,created:String(t.createdDate).replace("T"," ")}})
   };
@@ -552,17 +553,21 @@ function buildReport(j){
   .then(function(results){
     var reportRows = results[0], credRows = results[1];
     if(!reportRows || !reportRows.length || !reportRows[0].data){ init(DAILY_JSON, null); return; }
-    // Use latest row as the main report; inject last5DaySales from all 5 rows
     var json = reportRows[0].data;
-    // Build last5DaySales from the 5 rows using each row's todayChannels
     json.last5DaySales = reportRows.map(function(row){
       var d = row.data;
       if(d.todayChannels) return d.todayChannels;
-      // Fallback for old rows that still have last5DaySales embedded
       if(d.last5DaySales && d.last5DaySales.length) return d.last5DaySales[0];
-      // Last resort: summary only
       var s = d.daySaleSummary || {};
       return { date: d.date, Cash: s.cash||0, Pending: s.pending||0, Expense: s.expense||0, Total: s.total||0 };
+    });
+    // Use pendingPayments only from the latest (selected) row — no fallback to older rows
+    if(!json.pendingPayments) json.pendingPayments = { items: [] };
+    // Store per-date pending map for day chip switching
+    json._pendingByDate = {};
+    reportRows.forEach(function(row){
+      var d = row.data;
+      if(d.date && d.pendingPayments) json._pendingByDate[d.date] = d.pendingPayments;
     });
     var users = null;
     if(credRows && credRows.length){
@@ -645,9 +650,36 @@ $("days").addEventListener("click",function(e){var b=e.target.closest(".day");if
 
 /* day detail */
 var PAL=["#06b6d4","#8b5cf6","#f59e0b","#10b981","#ef4444","#3b82f6","#ec4899","#7c2d12"];
+function parsePending(raw){
+  return ((raw||{}).items||[]).filter(function(r){var t=r.totalPending!=null?r.totalPending:(r.total||0);return t!==0}).map(function(r,i){return {id:+r.id||i+1,name:r.customer||r.name||"",credit:r.credit||0,debit:r.debit||0,pending:r.pending||0,total:r.totalPending!=null?r.totalPending:(r.total||0)}}).sort(function(a,b){return Math.abs(b.total)-Math.abs(a.total)});}
+function renderPending(items){
+  var pt=sum(items.map(function(p){return p.total}));
+  $("pendTotal").textContent=inr(pt);
+  $("pendList").innerHTML=items.length?items.map(function(p){
+    var neg=p.total<0;
+    return '<div class="p"><div class="ph"><div class="av" style="background:linear-gradient(135deg,hsl('+(p.id*47%360)+',70%,55%),hsl('+(p.id*47%360+40)+',70%,40%));color:#fff">'+esc(p.name.charAt(0))+'</div><div class="m"><b>'+esc(p.name)+'</b><small>ID '+p.id+'</small></div>'+
+    '<div class="a"><b class="num '+(neg?'neg':'pos')+'">'+inr(p.total)+'</b>'+(p.pending?'<small>Today '+(p.pending>=0?"+":"")+inr(p.pending)+'</small>':'')+
+    '</div></div><div class="pg"><div class="cr'+(p.credit?'':' z')+'"><span>Credit</span><b class="num">'+inr(p.credit)+'</b></div><div class="db'+(p.debit?'':' z')+'"><span>Debit</span><b class="num">'+inr(p.debit)+'</b></div></div></div>'}).join(''):
+    '<div class="zero" style="border:0;text-align:center;padding:20px">No pending payments for this date</div>';
+}
 function renderDay(){
   var d=REPORT.days[cur];
   Array.prototype.forEach.call(document.querySelectorAll(".day"),function(b,i){b.classList.toggle("on",i===cur)});
+
+  /* update hero total + delta */
+  var prevD=REPORT.days[cur+1];
+  var diff2=prevD?d.total-prevD.total:0;
+  $("heroLabel").textContent="Total for "+d.date;
+  $("heroTotal").textContent=inr(d.total);
+  var delta=$("heroDelta");
+  if(delta&&prevD){delta.className="delta "+(diff2>=0?"up":"down");delta.textContent=(diff2>=0?"▲ ":"▼ ")+inr(Math.abs(diff2))+" vs "+short(prevD.date);}
+
+  /* update KPI cards */
+  var WAL2=APP.walletChannels,dig2=0,wal2=0;
+  REPORT.channels.forEach(function(n,i){if(WAL2.indexOf(n)>=0)wal2+=d.v[i];else dig2+=d.v[i];});
+  var prevTotal=prevD?prevD.total:0,prevExp=prevD?prevD.expense:0;
+  var kp2=[["Cash",d.cash,"--cash"],["Digital",dig2,"--digital"],["Wallet",wal2,"--wallet"],["Pending",d.pending,"--pending"],["Expense",d.expense,"--expense"],["Total sales",d.total-(prevTotal-prevExp),"--sales"]];
+  $("kpis").innerHTML=kp2.map(function(k){return '<div class="kpi" style="background-color:var('+k[2]+')"><span class="ic"><svg viewBox="0 0 24 24">'+IC[k[0]]+'</svg></span><small>'+k[0]+'</small><strong class="num">'+inr(k[1])+'</strong></div>';}).join("");
   var rows=REPORT.channels.map(function(n,i){return {n:n,v:d.v[i]}});
   var nz=rows.filter(function(r){return r.v>0}).sort(function(a,b){return b.v-a.v});
   var zr=rows.filter(function(r){return r.v===0});
@@ -658,8 +690,14 @@ function renderDay(){
 
     '<div class="cg" id="channelGrid">'+nz.concat(zr).map(function(r,i){var z=r.v===0,c=PAL[i%PAL.length];return '<div class="ct'+(z?' z':'')+'"><span class="chip"'+(z?'':' style="background:'+c+'"')+'>'+esc(r.n.slice(0,2))+'</span><small>'+esc(r.n)+'</small><b class="num">'+inr(r.v)+'</b>'+(z?'<div class="note">No records</div>':'<div class="bar"><i style="width:'+(r.v/mx*100).toFixed(1)+'%;background:'+c+'"></i></div>')+'</div>'}).join("")+((nz.length+zr.length)%2?'<div class="ct"></div>':"")+'</div>'+
     '<div class="sumline" id="dayTotalBox" style="border-top:1px solid var(--line);border-bottom:0;grid-template-columns:1fr"><div><small>Day total</small><b class="num" style="color:var(--total);font-size:18px">'+inr(d.total)+'</b></div></div>';
+  /* update pending for selected date */
+  var selDate=REPORT.days[cur].date.split('-').reverse().join('-'); // dd-Mon-yyyy -> yyyy-mm-dd
+  // convert display date back to raw date key: days store as "dd-Mon-yyyy", DB key is "yyyy-mm-dd"
+  var dm=REPORT.days[cur].date.split('-'),MON={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  var rawDate=dm[2]+'-'+(MON[dm[1]]||'01')+'-'+dm[0];
+  var dayPend=REPORT.pendingByDate[rawDate];
+  renderPending(parsePending(dayPend));
 }
-renderDay();
 
 /* compare table: channels as rows, days as columns */
 (function(){
@@ -672,14 +710,9 @@ renderDay();
   $("cmp").innerHTML=h+'</tbody>';
 })();
 
-/* pending */
-var pt = sum(REPORT.pendingPayments.map(function(p){return p.pending}));
-$("pendTotal").textContent = "Net "+inr(pt);
-$("pendList").innerHTML = REPORT.pendingPayments.map(function(p){
-  var c=p.pending>=0?"pos":"neg";
-  return '<div class="p"><div class="ph"><div class="av" style="background:linear-gradient(135deg,hsl('+(p.id*47%360)+',70%,55%),hsl('+(p.id*47%360+40)+',70%,40%));color:#fff">'+esc(p.name.charAt(0))+'</div><div class="m"><b>'+esc(p.name)+'</b><small>ID '+p.id+'</small></div>'+
-    '<div class="a"><b class="num '+c+'">'+inr(p.pending)+'</b><small>Total pending '+inr(p.total)+'</small></div></div>'+
-    '<div class="pg"><div class="cr'+(p.credit?'':' z')+'"><span>Credit</span><b class="num">'+inr(p.credit)+'</b></div><div class="db'+(p.debit?'':' z')+'"><span>Debit</span><b class="num">'+inr(p.debit)+'</b></div></div></div>'}).join("");
+/* pending — initial render uses latest day (cur=0) */
+renderPending(REPORT.pendingPayments);
+
 
 /* expenses */
 var et = sum(REPORT.expenses.map(function(e){return e.amount}));
@@ -776,7 +809,7 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
   /* first notifications come from the report itself */
   var old=REPORT.todos.filter(function(t){return (ref-new Date(t.created.replace(" ","T")))/864e5>=30}).length, rd=REPORT.date;
   push([
-    {id:"pend-"+rd,type:"pending",title:REPORT.pendingPayments.length+" pending payments",text:"Net "+inr(pt)},
+    {id:"pend-"+rd,type:"pending",title:REPORT.pendingPayments.length+" pending payments",text:"Total "+inr(sum(REPORT.pendingPayments.map(function(p){return p.total})))},
     {id:"exp-"+rd,type:"expense",title:inr(et)+" expense today",text:REPORT.expenses.map(function(e){return e.description}).join(", ")},
     {id:"todo-"+rd,type:"todo",title:old+" to-dos open over 30 days",text:REPORT.todos.length+" active in total"},
     {id:"tot-"+rd,type:diff>=0?"up":"down",title:"Total "+(diff>=0?"up ":"down ")+inr(Math.abs(diff)),text:"vs "+short(prev.date)}
