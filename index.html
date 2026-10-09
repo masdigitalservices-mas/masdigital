@@ -158,7 +158,6 @@ nav a.on{color:var(--brand);font-weight:700}
 .top{position:relative;overflow:hidden}
 .top .art{position:absolute;right:-30px;top:-20px;width:260px;height:200px;opacity:.5;pointer-events:none}
 .brand{position:relative;z-index:1}.top .art{z-index:0}.hero{position:relative;z-index:2}
-svg.logo{width:44px;height:44px;border:0;background:none;display:block;flex:none}
 h2:before{content:"";width:5px;height:18px;border-radius:3px;background:linear-gradient(var(--brand-2),var(--digital));align-self:center}
 .kpi{position:relative;overflow:hidden;background-image:linear-gradient(135deg,rgba(255,255,255,.24),rgba(0,0,0,.16))}
 .kpi:before{content:"";position:absolute;right:-22px;bottom:-26px;width:90px;height:90px;border-radius:50%;background:#ffffff26}
@@ -314,7 +313,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 <header class="top" id="appHeader">
   <svg class="art" id="headerArt" viewBox="0 0 260 200" fill="none" stroke="#fff"><circle cx="190" cy="70" r="40" stroke-opacity=".5"/><circle cx="190" cy="70" r="70" stroke-opacity=".35"/><circle cx="190" cy="70" r="100" stroke-opacity=".2"/><path d="M0 150c40-30 70 30 110 0s70-30 150 10" stroke-opacity=".5" stroke-width="2"/><g fill="#fff" stroke="none" opacity=".6"><circle cx="120" cy="40" r="3"/><circle cx="150" cy="110" r="2.5"/><circle cx="235" cy="150" r="3.5"/></g></svg>
   <div class="brand" id="brand">
-    <svg class="logo" id="logo" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff" stroke="#38bdf8" stroke-width="3"/><path d="M12 30l6-13 6 9 6-9 6 13" fill="none" stroke="#e11d74" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="11" y="33" width="26" height="3.5" rx="1.7" fill="#f59e0b"/></svg>
+    <img id="logo" src="images/MASLogoRound.jpg" alt="MAS" class="logo" style="object-fit:cover">
     <div id="brandText">
       <h1 id="appTitle">MAS Digital Service</h1>
       <p id="sub"></p>
