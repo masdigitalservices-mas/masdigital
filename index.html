@@ -582,7 +582,7 @@ function sum(a){return a.reduce(function(x,y){return x+y},0)}
 document.title = APP.name+" - "+APP.reportLabel;
 $("appTitle").textContent = APP.name; $("lgTitle").textContent = APP.name;
 var lgHint=$("lgHint");if(lgHint){lgHint.hidden=!APP.demoHint;if(APP.demoHint)lgHint.innerHTML="Demo accounts (replace with your real login):<br>"+esc(APP.demoHint);}
-$("sub").textContent = APP.reportLabel+" · "+REPORT.date;
+$("sub").textContent = APP.reportLabel+" : "+REPORT.date.split('-').slice(0,2).join(' ');
 var prev = REPORT.days[1], today = REPORT.days[0];
 var diff = prev ? today.total - prev.total : 0;
 var parts = [["Cash",S.cash,"var(--cash)"],["Digital",S.digital,"var(--digital)"],["Wallet",S.wallet,"var(--wallet)"],["Pending",S.pending,"var(--pending)"]];
@@ -613,7 +613,7 @@ $("kpis").innerHTML = kp.map(function(k){
 /* day chips */
 var cur = 0;
 $("days").innerHTML = REPORT.days.map(function(d,i){
-  return '<button class="day" data-i="'+i+'"><small>'+(i===0?"Today":short(d.date).split(" ")[0]+" "+short(d.date).split(" ")[1])+'</small><b class="num">'+inr(d.total)+'</b></button>'}).join("");
+  return '<button class="day" data-i="'+i+'"><small>'+short(d.date)+'</small><b class="num">'+inr(d.total)+'</b></button>'}).join("");
 $("days").addEventListener("click",function(e){var b=e.target.closest(".day");if(b){cur=+b.dataset.i;renderDay()}});
 
 /* stacked bar chart per day, newest first */
@@ -626,7 +626,7 @@ $("days").addEventListener("click",function(e){var b=e.target.closest(".day");if
   [0,.5,1].forEach(function(f){var y=B-f*K;h+='<line x1="0" x2="300" y1="'+y+'" y2="'+y+'" stroke="var(--line)" stroke-dasharray="3 4"/>'});
   d.forEach(function(x,i){var X=gap+i*(bw+gap),cx=X+bw/2,y=B,tot=x.c+x.g+x.w+x.p+x.e;
     [[x.c,"var(--cash)"],[x.g,"var(--digital)"],[x.w,"var(--wallet)"],[x.p,"var(--pending)"],[x.e,"var(--expense)"]].forEach(function(s){if(!s[0])return;var hh=Math.max(s[0]/mx*K,1.5);y-=hh;h+='<rect x="'+X+'" y="'+y+'" width="'+bw+'" height="'+hh+'" fill="'+s[1]+'"/>'});
-    h+='<text class="v" x="'+cx+'" y="'+(y-5)+'">'+Math.round(tot/1000)+'k</text><text '+(i===0?'class="v" ':'')+'x="'+cx+'" y="134">'+(i===0?"Today":x.l)+'</text>';
+    h+='<text class="v" x="'+cx+'" y="'+(y-5)+'">'+Math.round(tot/1000)+'k</text><text x="'+cx+'" y="134">'+x.l+'</text>';
     /* value rows under each day */
     [[x.c,"var(--cash)"],[x.g,"var(--digital)"],[x.w,"var(--wallet)"],[x.p,"var(--pending)"],[x.e,"var(--expense)"]].forEach(function(s,j){var ty=152+j*16;
       h+='<rect x="'+(cx-27)+'" y="'+(ty-7)+'" width="6" height="6" rx="2" fill="'+s[1]+'"/><text x="'+(cx-18)+'" y="'+ty+'" style="text-anchor:start;fill:var(--text)">'+s[0].toLocaleString("en-IN")+'</text>'})});
@@ -872,7 +872,7 @@ $("lvFrom").value=$("lvTo").value=todayStr();lvType();
 /* view switching: Leave tab shows the leave page, other tabs return to the report */
 var view="report";
 function setView(v){view=v;$("reportView").hidden=v==="leave";$("leaveView").hidden=v!=="leave";
-  $("sub").textContent=v==="leave"?"Leave & permission":APP.reportLabel+" · "+REPORT.date;
+  $("sub").textContent=v==="leave"?"Leave & permission":APP.reportLabel+" : "+REPORT.date.split('-').slice(0,2).join(' ');
   links.forEach(function(a){a.classList.toggle("on",v==="leave"&&a.dataset.s==="leave")})}
 links.forEach(function(a){a.addEventListener("click",function(e){
   if(a.dataset.s==="leave"){e.preventDefault();setView("leave");lvRender();scrollTo(0,0)}
