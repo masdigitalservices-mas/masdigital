@@ -311,7 +311,8 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 <div class="app" id="app">
 
 <header class="top" id="appHeader">
-  
+  <svg class="art" viewBox="0 0 260 200" fill="none" stroke="#fff"><circle cx="190" cy="70" r="40" stroke-opacity=".5"/><circle cx="190" cy="70" r="70" stroke-opacity=".35"/><circle cx="190" cy="70" r="100" stroke-opacity=".2"/><path d="M0 150c40-30 70 30 110 0s70-30 150 10" stroke-opacity=".5" stroke-width="2"/><g fill="#fff" stroke="none" opacity=".6"><circle cx="120" cy="40" r="3"/><circle cx="150" cy="110" r="2.5"/><circle cx="235" cy="150" r="3.5"/></g></svg>
+
   <div class="brand" id="brand">
     <img id="logo" src="icons/MASLogoRound.jpg" alt="MAS" class="logo">
     <div id="brandText">
@@ -380,7 +381,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 </div>
 
 <div class="pop" id="notifPop"><h3 id="ntTitle">Notifications <small id="ntSub"></small><button id="ntClearAll" style="border:0;background:none;color:var(--neg);font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0 0 0 8px;margin-left:auto">Clear all</button></h3><div id="ntList"></div></div>
-<div class="pop" id="userPop"><div class="who"><span class="avatar" id="avBig"></span><div><b id="uName"></b><small id="uRole">MAS Digital Service</small></div></div><button class="row2" id="themeBtn"><span>Dark / light mode</span><span>◐</span></button><button class="row2" id="installBtn" hidden><span>Install app</span><span>⬇</span></button><button class="row2" id="alertBtn"><span>Phone alerts</span><span id="alertState">Off</span></button><button class="row2 out" id="logoutBtn"><span>Log out</span><span>⎋</span></button></div>
+<div class="pop" id="userPop"><div class="who"><span class="avatar" id="avBig"></span><div><b id="uName"></b><small id="uRole">MAS Digital Service</small></div></div><button class="row2" id="themeBtn"><span>Dark / light mode</span><span>◐</span></button><button class="row2" id="installBtn" hidden><span>Install app</span><span>⬇</span></button><button class="row2" id="alertBtn"><span>Phone alerts</span><span id="alertState">Off</span></button><button class="row2 out" id="delDayBtn" hidden><span id="delDayLabel">Delete day record</span><span>🗑</span></button><button class="row2 out" id="logoutBtn"><span>Log out</span><span>⎋</span></button></div>
 
 <nav id="bottomNav"><div class="in" id="bottomNavIn">
   <a href="#top" class="on" id="navSummary" data-s="top"><span>📊</span>Summary</a>
@@ -597,7 +598,7 @@ function sum(a){return a.reduce(function(x,y){return x+y},0)}
 document.title = APP.name+" - "+APP.reportLabel;
 $("appTitle").textContent = APP.name; $("lgTitle").textContent = APP.name;
 var lgHint=$("lgHint");if(lgHint){lgHint.hidden=!APP.demoHint;if(APP.demoHint)lgHint.innerHTML="Demo accounts (replace with your real login):<br>"+esc(APP.demoHint);}
-$("sub").textContent = APP.reportLabel+" : "+REPORT.date.split('-').slice(0,2).join(' ');
+$("sub").textContent = "Koovathur";
 var prev = REPORT.days[1], today = REPORT.days[0];
 var diff = prev ? today.total - prev.total : 0;
 var parts = [["Cash",S.cash,"var(--cash)"],["Digital",S.digital,"var(--digital)"],["Wallet",S.wallet,"var(--wallet)"],["Pending",S.pending,"var(--pending)"]];
@@ -673,6 +674,20 @@ function renderDay(){
   $("heroTotal").textContent=inr(d.total);
   var delta=$("heroDelta");
   if(delta&&prevD){delta.className="delta "+(diff2>=0?"up":"down");delta.textContent=(diff2>=0?"▲ ":"▼ ")+inr(Math.abs(diff2))+" vs "+short(prevD.date);}
+  /* update donut for selected day */
+  (function(){
+    var WALd=APP.walletChannels,dig3=0,wal3=0;
+    REPORT.channels.forEach(function(n,i){if(WALd.indexOf(n)>=0)wal3+=d.v[i];else dig3+=d.v[i];});
+    var seg3=[["Cash",d.cash,"var(--cash)"],["Digital",dig3,"var(--digital)"],["Wallet",wal3,"var(--wallet)"]],t3=sum(seg3.map(function(x){return x[1]})),C3=2*Math.PI*44,off3=0;
+    var h3='<defs><path id="dpt" d="M60 19A41 41 0 0 1 60 101A41 41 0 0 1 60 19"/><path id="dpb" d="M60 107A47 47 0 0 0 60 13A47 47 0 0 0 60 107"/></defs><circle cx="60" cy="60" r="44" fill="none" stroke="var(--chip)" stroke-width="16"/>',L3='';
+    seg3.forEach(function(x,i){var l=x[1]/t3*C3;h3+='<circle data-i="'+i+'" cx="60" cy="60" r="44" fill="none" stroke="'+x[2]+'" stroke-width="16" stroke-dasharray="'+Math.max(l-2,0)+' '+C3+'" stroke-dashoffset="'+(-off3)+'" transform="rotate(-90 60 60)"/>';
+      if(x[1]/t3>.06){var th=(off3+l/2)/t3*C3/C3*360,bot=th>90&&th<270,off2b=bot?((180-th+360)%360)/360*2*Math.PI*47:th/360*2*Math.PI*41;
+        L3+='<text font-size="8.5" font-weight="700" style="fill:#fff;pointer-events:none"><textPath href="#'+(bot?'dpb':'dpt')+'" startOffset="'+off2b.toFixed(1)+'">'+Math.round(x[1]/t3*100)+'%</textPath></text>'}
+      off3+=l});
+    function ctr3(a,b){return h3+L3+'<text x="60" y="56" font-size="9" style="fill:var(--muted)">'+a+'</text><text x="60" y="71" font-size="14" font-weight="800">'+b+'</text>'}
+    var dn=$("donut");dn.innerHTML=ctr3("Collected",inr(t3));
+    dn.onclick=function(e){var i=e.target.getAttribute("data-i");dn.innerHTML=i===null?ctr3("Collected",inr(t3)):ctr3(seg3[+i][0],inr(seg3[+i][1]))};
+  })();
 
   /* update KPI cards */
   var WAL2=APP.walletChannels,dig2=0,wal2=0;
@@ -688,7 +703,7 @@ function renderDay(){
     '<div class="sumline c" id="daySummary">'+[["Cash",d.cash,"--cash"],["Pending",d.pending,"--pending"],["Expense",d.expense,"--expense"]].map(function(k){return '<div style="--c:var('+k[2]+')"><small>'+k[0]+'</small><b class="num">'+inr(k[1])+'</b></div>'}).join("")+'</div>'+
 
 
-    '<div class="cg" id="channelGrid">'+nz.concat(zr).map(function(r,i){var z=r.v===0,c=PAL[i%PAL.length];return '<div class="ct'+(z?' z':'')+'"><span class="chip"'+(z?'':' style="background:'+c+'"')+'>'+esc(r.n.slice(0,2))+'</span><small>'+esc(r.n)+'</small><b class="num">'+inr(r.v)+'</b>'+(z?'<div class="note">No records</div>':'<div class="bar"><i style="width:'+(r.v/mx*100).toFixed(1)+'%;background:'+c+'"></i></div>')+'</div>'}).join("")+((nz.length+zr.length)%2?'<div class="ct"></div>':"")+'</div>'+
+    '<div class="cg" id="channelGrid">'+nz.concat(zr).map(function(r,i){var z=r.v===0,c=PAL[i%PAL.length];return '<div class="ct'+(z?' z':'')+'"><span class="chip"'+(z?'':' style="background:'+c+'"')+'>'+esc(r.n.slice(0,2))+'</span><small>'+esc(r.n)+'</small><b class="num">'+inr(r.v)+'</b>'+(z?'':'<div class="bar"><i style="width:'+(r.v/mx*100).toFixed(1)+'%;background:'+c+'"></i></div>')+'</div>'}).join("")+((nz.length+zr.length)%2?'<div class="ct"></div>':"")+'</div>'+
     '<div class="sumline" id="dayTotalBox" style="border-top:1px solid var(--line);border-bottom:0;grid-template-columns:1fr"><div><small>Day total</small><b class="num" style="color:var(--total);font-size:18px">'+inr(d.total)+'</b></div></div>';
   /* update pending for selected date */
   var selDate=REPORT.days[cur].date.split('-').reverse().join('-'); // dd-Mon-yyyy -> yyyy-mm-dd
@@ -934,7 +949,7 @@ $("lvFrom").value=$("lvTo").value=todayStr();lvType();
 /* view switching: Leave tab shows the leave page, other tabs return to the report */
 var view="report";
 function setView(v){view=v;$("reportView").hidden=v==="leave";$("leaveView").hidden=v!=="leave";
-  $("sub").textContent=v==="leave"?"Leave & permission":APP.reportLabel+" : "+REPORT.date.split('-').slice(0,2).join(' ');
+  $("sub").textContent=v==="leave"?"Leave & permission":"Koovathur";
   links.forEach(function(a){a.classList.toggle("on",v==="leave"&&a.dataset.s==="leave")})}
 links.forEach(function(a){a.addEventListener("click",function(e){
   if(a.dataset.s==="leave"){e.preventDefault();setView("leave");lvRender();scrollTo(0,0)}
@@ -952,7 +967,8 @@ function check(u,p){return LV.users.filter(function(x){return x.user===u.trim().
 function applyUser(){var u=uById(LV.me),ini=u.name.charAt(0).toUpperCase();
   if(u.photo){$("avBtn").innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';$("avBig").innerHTML='<img src="'+u.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';}else{$("avBtn").textContent=ini;$("avBig").textContent=ini;}
   $("uName").textContent=u.name;
-  $("uRole").textContent=(u.role==="admin"?"Admin":"Staff")+" · "+APP.name}
+  $("uRole").textContent=(u.role==="admin"?"Admin":"Staff")+" · "+APP.name;
+  $("delDayBtn").hidden=u.role!=="admin";}
 function saleCheck(){ /* a report date we have not shown before = a new day sale */
   var last="";try{last=localStorage.getItem("mas_lastsale")||""}catch(e){}
   if(last===REPORT.date)return;
@@ -976,6 +992,15 @@ function doLogin(){
 $("lgBtn").onclick=doLogin;
 ["lgUser","lgPass"].forEach(function(id){$(id).addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();doLogin()}})});
 $("logoutBtn").onclick=function(){clearAuth();$("userPop").classList.remove("open");showLogin()};
+$("delDayBtn").onclick=function(e){e.stopPropagation();
+  var dm=REPORT.days[cur].date.split('-'),MON={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  var rawDate=dm[2]+'-'+(MON[dm[1]]||'01')+'-'+dm[0];
+  if(!confirm('Delete day sale record for '+REPORT.days[cur].date+'?\nThis cannot be undone.'))return;
+  $("userPop").classList.remove("open");
+  fetch(SB_URL+'/rest/v1/day_sale_report?date=eq.'+rawDate,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'return=minimal'}})
+    .then(function(r){if(r.ok){MASBanner({type:'info',title:'Record deleted',text:REPORT.days[cur].date+' removed from Supabase'});setTimeout(function(){location.reload()},1500);}
+      else r.text().then(function(t){MASBanner({type:'alert',title:'Delete failed',text:t.slice(0,80)})});})
+    .catch(function(err){MASBanner({type:'alert',title:'Delete failed',text:String(err).slice(0,80)});});}
 (function(){var a=getAuth(),u=a&&uById(a.uid);if(u)enter(u.id);else showLogin()})();
 setInterval(lvSync,APP.syncSeconds*1000);
 /* ===== PWA: install button + service worker ===== */
