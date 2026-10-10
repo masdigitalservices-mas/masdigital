@@ -213,14 +213,14 @@ nav a svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;
 nav a.on span{background:color-mix(in srgb,var(--brand) 16%,transparent)}
 /* compact day grid */
 .cg{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
-.ct{background:var(--card);padding:9px 11px 8px;display:grid;grid-template-columns:28px 1fr;gap:0 8px;align-items:center;min-width:0}
-.ct .chip{width:28px;height:28px;font-size:10.5px;grid-row:1/3}
+.ct{background:var(--card);padding:9px 11px 8px;display:grid;grid-template-columns:28px 1fr auto;gap:0 8px;align-items:center;min-width:0}
+.ct .chip{width:28px;height:28px;font-size:10.5px;grid-row:1/3;grid-column:1}
 .ct small{color:var(--muted);font-size:11.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ct b{font-size:14px;line-height:1.25}
 .ct.z .chip{background:#94a3b8}
 .ct.z b{color:var(--muted)}
-.ct .note{grid-column:1/-1;font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap}
-.ct .bar{grid-column:1/-1;height:3px;margin-top:7px}
+.ct .note{grid-column:2/-1;font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap}
+.ct .bar{grid-column:2/-1;height:3px;margin-top:7px}
 .hrow{display:flex;align-items:center;gap:6px}
 .hl{flex:1;min-width:0}
 .hero .big{font-size:30px}
@@ -408,7 +408,7 @@ var APP = {
   name: "MAS Digital Service",            // shown in header, login screen, WhatsApp share, page title
   reportLabel: "Day sale",                // sub-title under the name
   walletChannels: ["DWallet","StarEC","IPBC","ESevai","AirTel","PayTM","JIO","TPlay"],  // channels counted as Wallet in charts (all other channels = Digital)
-  demoHint: "tamil / admin123 · raja / raja123",   // text under the login button; set "" to hide
+  demoHint: "",   // text under the login button; set "" to hide
   toastSeconds: 6,                        // how long the alert banner stays
   syncSeconds: 4                          // how often leave alerts are checked
 };
@@ -425,107 +425,45 @@ var NOTIFY = {
 
 /* 3. LOGIN USERS (role: "admin" sees the full leave queue; "user" sees only their own).
       Demo only — real passwords must be checked on your server, never stored in the page. */
-var USERS = [
-  {id:1, name:"Tamil",   role:"admin", user:"tamil",   pass:"admin123"},
-  {id:2, name:"Raja",    role:"user",  user:"raja",    pass:"raja123"},
-  {id:3, name:"Antony",  role:"user",  user:"antony",  pass:"antony123"},
-  {id:4, name:"Arnold",  role:"user",  user:"arnold",  pass:"arnold123"}
-];
+var USERS = [];
 
 /* 4. LEAVE / PERMISSION REQUESTS  (type: Leave | Half day | Permission; status: Pending | Approved | Rejected) */
-var LEAVE_REQUESTS = [
-  {id:1, uid:2, type:"Leave",      from:"2026-10-08", to:"2026-10-09", reason:"Family function", status:"Pending"},
-  {id:2, uid:3, type:"Permission", from:"2026-10-07", to:"2026-10-07", t1:"15:00", t2:"17:00", reason:"Bank work", status:"Pending"},
-  {id:3, uid:4, type:"Half day",   from:"2026-10-03", to:"2026-10-03", sess:"Morning", reason:"Not well", status:"Approved"}
-];
+var LEAVE_REQUESTS = [];
 
 /* 5. DAY REPORT — the cloud response, exactly as the API returns it (this copy is daily_report_2026-10-08.json).
       Replace DAILY_JSON with the fetched response; buildReport() turns it into what the page draws. */
 var DAILY_JSON = {
-    "date": "2026-10-08",
-    "generatedBy": "TAMIL",
-    "generatedAt": "2026-10-08T17:17:02",
-    "daySaleSummary": {
-      "cash": 26430,
-      "digital": 29873,
-      "wallet": 45634,
-      "pending": 331809,
-      "expense": 0,
-      "total": 433746,
-      "totalSales": 316
-    },
-    "last5DaySales": [
-      {
-        "date": "2026-10-08",
-        "DigiPay": 296, "DWallet": 298, "StarEC": 443, "SBI": 100, "SBI(J)": 1551,
-        "IndBank": 12438, "INBA": 3701, "IPPB": 2200, "IPBC": 42802, "Canara": 4458,
-        "City": 5129, "ESevai": 372, "AirTel": 684, "PayTM": 249, "JIO": 11, "TPlay": 775,
-        "Cash": 26430, "Pending": 331809, "Expense": 0, "Total": 433746
-      },
-      {
-        "date": "2026-10-07",
-        "DigiPay": 296, "DWallet": 395, "StarEC": 485, "SBI": 3450, "SBI(J)": 715,
-        "IndBank": 12438, "INBA": 520, "IPPB": 5311, "IPBC": 5531, "Canara": 0,
-        "City": 607, "ESevai": 420, "AirTel": 1065, "PayTM": 526, "JIO": 11, "TPlay": 60,
-        "Cash": 68230, "Pending": 333370, "Expense": 0, "Total": 433430
-      },
-      {
-        "date": "2026-10-06",
-        "DigiPay": 296, "DWallet": 395, "StarEC": 133, "SBI": 12437, "SBI(J)": 2585,
-        "IndBank": 12438, "INBA": 1877, "IPPB": 429, "IPBC": 6604, "Canara": 0,
-        "City": 1673, "ESevai": 100, "AirTel": 1581, "PayTM": 24, "JIO": 11, "TPlay": 42,
-        "Cash": 58230, "Pending": 333070, "Expense": 370, "Total": 432295
-      },
-      {
-        "date": "2026-10-05",
-        "DigiPay": 296, "DWallet": 395, "StarEC": 679, "SBI": 13737, "SBI(J)": 1209,
-        "IndBank": 12438, "INBA": 119, "IPPB": 5180, "IPBC": 361, "Canara": 0,
-        "City": 555, "ESevai": 316, "AirTel": 114, "PayTM": 158, "JIO": 11, "TPlay": 42,
-        "Cash": 64580, "Pending": 331568, "Expense": 300, "Total": 432058
-      },
-      {
-        "date": "2026-10-04",
-        "DigiPay": 296, "DWallet": 395, "StarEC": 1524, "SBI": 827, "SBI(J)": 3217,
-        "IndBank": 10688, "INBA": 54, "IPPB": 988, "IPBC": 4353, "Canara": 0,
-        "City": 18672, "ESevai": 328, "AirTel": 401, "PayTM": 365, "JIO": 11, "TPlay": 42,
-        "Cash": 55600, "Pending": 332093, "Expense": 0, "Total": 429854
-      }
-    ],
-    "pendingPayments": {
-      "netPending": -8602,
-      "items": [
-        { "id": "4",  "customer": "MAS Coin",   "credit": 0,    "debit": 250,  "pending": -250,  "totalPending": -250  },
-        { "id": "8",  "customer": "Sherly",      "credit": 1011, "debit": 2000, "pending": -989,  "totalPending": -989  },
-        { "id": "18", "customer": "Sri vidhya",  "credit": 5250, "debit": 6613, "pending": -1363, "totalPending": -1363 },
-        { "id": "55", "customer": "Raja K",      "credit": 0,    "debit": 6000, "pending": -6000, "totalPending": -6000 }
-      ]
-    },
-    "activeTodoList": {
-      "count": 2,
-      "items": [
-        { "task": "Martin Water Bill 600", "createdDate": "2026-06-05T13:24:21", "status": "Active" },
-        { "task": "thathuva john 500", "createdDate": "2026-05-03T12:43:31", "status": "Active" }
-      ]
-    }
+    "date": "",
+    "generatedBy": "",
+    "generatedAt": new Date().toISOString(),
+    "daySaleSummary": {"cash":0,"digital":0,"wallet":0,"pending":0,"expense":0,"total":0,"totalSales":0},
+    "last5DaySales": [{"date":"","Cash":0,"Pending":0,"Expense":0,"Total":0}],
+    "pendingPayments": {"netPending":0,"items":[]},
+    "activeTodoList": {"count":0,"items":[]}
   };
 
 function buildReport(j){
   var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   function d(s){var p=String(s).slice(0,10).split("-");return p[2]+"-"+M[+p[1]-1]+"-"+p[0]}
-  var SKIP={date:1,Cash:1,Pending:1,Expense:1,Total:1};
-  var ch=Object.keys(j.last5DaySales[0]).filter(function(k){return !SKIP[k]});
+  var SKIP={date:1,Cash:1,Pending:1,Expense:1,Total:1,Remarks:1};
+  // find the row with the most channel keys to use as channel list
+  var chRow=j.last5DaySales.reduce(function(best,row){
+    var n=Object.keys(row).filter(function(k){return !SKIP[k]}).length;
+    return n>Object.keys(best).filter(function(k){return !SKIP[k]}).length?row:best;
+  },j.last5DaySales[0]);
+  var ch=Object.keys(chRow).filter(function(k){return !SKIP[k]});
   var g=new Date(j.generatedAt),h=g.getHours(),sm=j.daySaleSummary;
   var at=(g.getMonth()+1)+"/"+g.getDate()+"/"+g.getFullYear()+" "+((h%12)||12)+":"+("0"+g.getMinutes()).slice(-2)+":"+("0"+g.getSeconds()).slice(-2)+" "+(h<12?"AM":"PM");
   return {
-    date:d(j.date), generatedBy:j.generatedBy, generatedAt:at,
+    date:d(j.date), generatedBy:j.generatedBy||'', generatedAt:at,
     summary:{cash:sm.cash,digital:sm.digital,wallet:sm.wallet,pending:sm.pending,expense:sm.expense,total:sm.total,
       totalSales:j.last5DaySales&&j.last5DaySales.length>1?(sm.total-(j.last5DaySales[1].Total||0)+(j.last5DaySales[1].Expense||0)):sm.totalSales||0},
     channels:ch,
-    days:j.last5DaySales.map(function(x){return {date:d(x.date),v:ch.map(function(k){return x[k]||0}),cash:x.Cash,pending:x.Pending,expense:x.Expense,total:x.Total}}),
+    days:j.last5DaySales.map(function(x){return {date:d(x.date),v:ch.map(function(k){return x[k]||0}),cash:x.Cash||0,pending:x.Pending||0,expense:x.Expense||0,total:x.Total||0,remarks:x.Remarks||''}}),
     pendingPayments:((j.pendingPayments||{}).items||[]).filter(function(r){var t=r.totalPending!=null?r.totalPending:(r.total||0);return t!==0}).map(function(r,i){return {id:+r.id||i+1,name:r.customer||r.name||"",credit:r.credit||0,debit:r.debit||0,pending:r.pending||0,total:r.totalPending!=null?r.totalPending:(r.total||0)}}).sort(function(a,b){return Math.abs(b.total)-Math.abs(a.total)}),
     pendingByDate:j._pendingByDate||{},
-    expenses:(j.expenses&&j.expenses.items||j.expenses||[]).map(function(e){return {category:e.category,amount:e.amount,count:e.count,description:e.description}}),
-    todos:((j.activeTodoList||{}).items||[]).map(function(t){return {task:t.task,created:String(t.createdDate).replace("T"," ")}})
+    expenses:(j.expenses&&j.expenses.items||j.expenses||[]).map(function(e){return {category:e.category||'',amount:e.amount||0,count:e.count||0,description:e.description||''}}),
+    todos:((j.activeTodoList||{}).items||[]).map(function(t){return {task:t.task,created:String(t.createdDate||t.created||'').replace("T"," ")}})
   };
 }
 
@@ -546,34 +484,48 @@ function buildReport(j){
 
   // Fetch latest 5 report rows + user credentials in parallel
   Promise.all([
-    fetch(SB_URL+'/rest/v1/day_sale_report?select=date,data&order=date.desc&limit=5', {headers: sbHeaders})
+    fetch(SB_URL+'/rest/v1/day_sale_report?select=date,data&order=date.desc&limit=10', {headers: sbHeaders})
       .then(function(r){ return r.json(); }),
     fetch(SB_URL+'/rest/v1/user_credentials?select=*', {headers: sbHeaders})
       .then(function(r){ return r.json(); })
   ])
   .then(function(results){
     var reportRows = results[0], credRows = results[1];
-    if(!reportRows || !reportRows.length || !reportRows[0].data){ init(DAILY_JSON, null); return; }
-    var json = reportRows[0].data;
-    json.last5DaySales = reportRows.map(function(row){
+    if(!reportRows || !reportRows.length){ init(DAILY_JSON, null); return; }
+    // find the newest row that has valid data
+    var validRows = reportRows.filter(function(r){ return r.data && r.data.date; });
+    if(!validRows.length){ init(DAILY_JSON, null); return; }
+    // sort by date descending to ensure correct order regardless of DB ordering
+    validRows.sort(function(a,b){ return b.data.date < a.data.date ? -1 : b.data.date > a.data.date ? 1 : 0; });
+    // cap to 5 for the day chips
+    var top5 = validRows.slice(0,5);
+    var json = JSON.parse(JSON.stringify(top5[0].data)); // deep copy newest
+    json.last5DaySales = top5.map(function(row){
       var d = row.data;
       if(d.todayChannels) return d.todayChannels;
-      if(d.last5DaySales && d.last5DaySales.length) return d.last5DaySales[0];
       var s = d.daySaleSummary || {};
-      return { date: d.date, Cash: s.cash||0, Pending: s.pending||0, Expense: s.expense||0, Total: s.total||0 };
+      var own = { date: d.date, Cash: s.cash||0, Pending: s.pending||0, Expense: s.expense||0, Total: s.total||0 };
+      // merge channel breakdown from last5DaySales[0] if its date matches this row's date
+      if(d.last5DaySales && d.last5DaySales.length && d.last5DaySales[0].date === d.date)
+        return Object.assign(own, d.last5DaySales[0]);
+      return own;
+    });
+    // ensure date field on each channel row matches the row's own date
+    top5.forEach(function(row, i){
+      if(json.last5DaySales[i] && !json.last5DaySales[i].date) json.last5DaySales[i].date = row.data.date;
     });
     // Use pendingPayments only from the latest (selected) row — no fallback to older rows
     if(!json.pendingPayments) json.pendingPayments = { items: [] };
     // Store per-date pending map for day chip switching
     json._pendingByDate = {};
-    reportRows.forEach(function(row){
+    top5.forEach(function(row){
       var d = row.data;
       if(d.date && d.pendingPayments) json._pendingByDate[d.date] = d.pendingPayments;
     });
     var users = null;
     if(credRows && credRows.length){
       users = credRows.map(function(c, i){
-        return {id: i+1, name: c.name||c.username, role: c.usertype||'user', user: c.username, pass: c.pin, photo: c.photo||null};
+        return {id: i+1, name: c.name||c.username, role: c.usertype||'user', user: (c.username||'').toLowerCase(), pass: c.pin, photo: c.photo||null};
       });
     }
     init(json, users);
@@ -703,8 +655,9 @@ function renderDay(){
     '<div class="sumline c" id="daySummary">'+[["Cash",d.cash,"--cash"],["Pending",d.pending,"--pending"],["Expense",d.expense,"--expense"]].map(function(k){return '<div style="--c:var('+k[2]+')"><small>'+k[0]+'</small><b class="num">'+inr(k[1])+'</b></div>'}).join("")+'</div>'+
 
 
-    '<div class="cg" id="channelGrid">'+nz.concat(zr).map(function(r,i){var z=r.v===0,c=PAL[i%PAL.length];return '<div class="ct'+(z?' z':'')+'"><span class="chip"'+(z?'':' style="background:'+c+'"')+'>'+esc(r.n.slice(0,2))+'</span><small>'+esc(r.n)+'</small><b class="num">'+inr(r.v)+'</b>'+(z?'':'<div class="bar"><i style="width:'+(r.v/mx*100).toFixed(1)+'%;background:'+c+'"></i></div>')+'</div>'}).join("")+((nz.length+zr.length)%2?'<div class="ct"></div>':"")+'</div>'+
-    '<div class="sumline" id="dayTotalBox" style="border-top:1px solid var(--line);border-bottom:0;grid-template-columns:1fr"><div><small>Day total</small><b class="num" style="color:var(--total);font-size:18px">'+inr(d.total)+'</b></div></div>';
+    '<div class="cg" id="channelGrid">'+nz.concat(zr).map(function(r,i){var z=r.v===0,c=PAL[i%PAL.length];return '<div class="ct'+(z?' z':'')+'"><span class="chip"'+(z?'':' style="background:'+c+'"')+'>'+esc(r.n.slice(0,2))+'</span><small>'+esc(r.n)+'</small><b class="num" style="text-align:right">'+inr(r.v)+'</b>'+(z?'':'<div class="bar"><i style="width:'+(r.v/mx*100).toFixed(1)+'%;background:'+c+'"></i></div>')+'</div>'}).join("")+((nz.length+zr.length)%2?'<div class="ct"></div>':"")+'</div>'+
+    '<div class="sumline" id="dayTotalBox" style="border-top:1px solid var(--line);border-bottom:0;grid-template-columns:1fr"><div><small>Day total</small><b class="num" style="color:var(--total);font-size:18px">'+inr(d.total)+'</b></div></div>'+
+    (d.remarks?'<div style="padding:10px 14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)"><span style="font-weight:600;color:var(--text)">Remarks: </span>'+esc(d.remarks)+'</div>':'');
   /* update pending for selected date */
   var selDate=REPORT.days[cur].date.split('-').reverse().join('-'); // dd-Mon-yyyy -> yyyy-mm-dd
   // convert display date back to raw date key: days store as "dd-Mon-yyyy", DB key is "yyyy-mm-dd"
@@ -737,7 +690,7 @@ $("expList").innerHTML = REPORT.expenses.map(function(e){
 
 /* todo */
 $("todoCount").textContent = REPORT.todos.length+" active";
-var ref = new Date("2026-10-06T00:00:00");
+var ref=(function(){var dm=REPORT.date.split('-'),MON={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};return new Date(dm[2]+'-'+(MON[dm[1]]||'01')+'-'+dm[0]+'T00:00:00');})();
 $("todoList").innerHTML = REPORT.todos.map(function(t){
   var dt=new Date(t.created.replace(" ","T")), days=Math.max(0,Math.floor((ref-dt)/864e5));
   var cls=days>=30?"old":days>=7?"mid":"", label=days===0?"Today":days===1?"1 day":days<60?days+" days":Math.floor(days/30)+" months";
@@ -756,17 +709,24 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
   function unread(){return items.filter(function(n){return !read[n.id]}).length}
   function norm(n){var t=n.time?new Date(n.time).getTime():NaN;
     return {id:String(n.id!=null?n.id:(n.title||"")+(n.time||"")),type:TY[n.type]?n.type:"info",title:n.title||"",text:n.text||"",time:isNaN(t)?Date.now():t}}
+  function cleanup(){
+    var age5=Date.now()-5*864e5;
+    items=items.filter(function(n){return n.time>age5});
+    if(items.length&&items.every(function(n){return read[n.id]})){items=[];}
+    save();
+  }
   function dismiss(id){items=items.filter(function(n){return n.id!==id});read[id]=1;save();render();}
 
   var np=$("notifPop"),up=$("userPop"),bell=$("bellBtn");
   function render(){
+    cleanup();
     var c=serverCount!=null?serverCount:unread(), b=$("badge");
     b.textContent=c>0?(c>99?"99+":c):"";
     $("ntSub").textContent=c>0?c+" new":"All caught up";
     $("ntList").innerHTML=items.length?items.map(function(n){var t=TY[n.type];
       return '<div class="nt" data-nid="'+esc(n.id)+'" style="position:relative;overflow:hidden;transition:transform .25s,opacity .25s">'+
         '<span class="d" style="background:'+t[0]+'">'+t[1]+'</span>'+
-        '<div style="flex:1;min-width:0"><b>'+esc(n.title)+'</b><small>'+esc(n.text)+'</small></div>'+
+        '<div style="flex:1;min-width:0"><b>'+esc(n.title)+'</b><small>'+esc(n.text)+'</small>'+(n.to?(function(){var u=uById(n.to);return u?'<small style="color:var(--brand);font-size:11px;margin-top:2px;display:block">→ '+esc(u.name)+'</small>':''})():'')+'</div>'+
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none">'+
         '<small class="tm">'+rel(n.time)+'</small>'+(read[n.id]?'':'<i class="nd"></i>')+
         '<button data-clr="'+esc(n.id)+'" style="border:0;background:none;color:var(--muted);font-size:13px;line-height:1;cursor:pointer;padding:2px 0">✕</button>'+
@@ -807,6 +767,7 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
     list.forEach(function(n){var i=items.findIndex(function(x){return x.id===n.id});
       if(i<0){items.unshift(n);if(!read[n.id]){fresh++;fl.push(n)}}else items[i]=n});
     items.sort(function(a,b){return b.time-a.time});items=items.slice(0,NOTIFY.maxItems);
+    cleanup();
     if(fresh){serverCount=null;ring()}
     if(fl.length){fl.sort(function(a,b){return b.time-a.time});banner({type:fl[0].type,title:fl[0].title,text:fl[0].text+(fl.length>1?"  (+"+(fl.length-1)+" more)":"")})}
     render();
@@ -821,14 +782,7 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
     if(!d.notifications&&d.count==null&&(d.title||d.text))push(d);
   }
 
-  /* first notifications come from the report itself */
-  var old=REPORT.todos.filter(function(t){return (ref-new Date(t.created.replace(" ","T")))/864e5>=30}).length, rd=REPORT.date;
-  push([
-    {id:"pend-"+rd,type:"pending",title:REPORT.pendingPayments.length+" pending payments",text:"Total "+inr(sum(REPORT.pendingPayments.map(function(p){return p.total})))},
-    {id:"exp-"+rd,type:"expense",title:inr(et)+" expense today",text:REPORT.expenses.map(function(e){return e.description}).join(", ")},
-    {id:"todo-"+rd,type:"todo",title:old+" to-dos open over 30 days",text:REPORT.todos.length+" active in total"},
-    {id:"tot-"+rd,type:diff>=0?"up":"down",title:"Total "+(diff>=0?"up ":"down ")+inr(Math.abs(diff)),text:"vs "+short(prev.date)}
-  ]);
+  /* report notifications are pushed per-user inside saleCheck(), called from enter() */
 
   /* panels */
   function close(){np.classList.remove("open");up.classList.remove("open");bell.setAttribute("aria-expanded","false");$("avBtn").setAttribute("aria-expanded","false")}
@@ -867,24 +821,11 @@ $("themeBtn").onclick=function(){
   var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=dark?"#0e7490":"#0b141a";
 };
 
-/* bottom nav highlight */
-var links=document.querySelectorAll("nav a");
-/* scroll spy: highlight the last section whose top has passed 40% of the screen (works for tall sections like Sales) */
-var spyIds=["sales","pending","expenses","todo"];
-function spy(){
-  if(view==="leave")return;
-  var cur="top",line=innerHeight*.4;
-  spyIds.forEach(function(id){if($(id).getBoundingClientRect().top<=line)cur=id});
-  if(scrollY<120)cur="top";
-  else if(scrollY+innerHeight>=document.documentElement.scrollHeight-4)cur="todo";
-  links.forEach(function(a){a.classList.toggle("on",a.dataset.s===cur)});
-}
-window.addEventListener("scroll",spy,{passive:true});
-window.addEventListener("resize",spy);
+
 
 /* ===== LEAVE / PERMISSION =====
    Replace LV.users / LV.reqs / save+load with your app's login + API. role "admin" sees the full queue. */
-var LV={users:USERS,reqs:LEAVE_REQUESTS.slice(),me:1,f:"Pending"};
+var LV={users:USERS,reqs:LEAVE_REQUESTS.slice(),me:null,f:"Pending"};
 try{var sv=JSON.parse(localStorage.getItem("mas_leave")||"null");if(sv){LV.reqs=sv.reqs}}catch(e){}
 function lvSave(){try{localStorage.setItem("mas_leave",JSON.stringify({reqs:LV.reqs,me:LV.me}))}catch(e){}}
 function lvNotes(){try{return JSON.parse(localStorage.getItem("mas_lvnotes")||"[]")}catch(e){return[]}}
@@ -892,7 +833,7 @@ function lvNotify(to,type,title,text){var a=lvNotes();a.push({id:"lv-"+Date.now(
   try{localStorage.setItem("mas_lvnotes",JSON.stringify(a.slice(-100)))}catch(e){}}
 var LVQ="";
 function lvSync(){ /* push this user's leave notifications into the bell; admins also get a "requests waiting" alert */
-  if(!window.MASReport||document.body.classList.contains("locked"))return;
+  if(!window.MASReport||document.body.classList.contains("locked")||!LV.me)return;
   var me=uById(LV.me),m=lvNotes().filter(function(n){return n.to===me.id});if(m.length)MASReport.push(m);
   if(me.role==="admin"){var n=LV.reqs.filter(function(r){return r.status==="Pending"}).length,id="lv-queue-"+n;
     if(id!==LVQ){MASReport.drop("lv-queue");LVQ=id;if(n>0)MASReport.push({id:id,type:"alert",title:n+" leave request"+(n>1?"s":"")+" waiting",text:"Open the Leave tab to approve or reject"})}}}
@@ -946,14 +887,37 @@ $("lvSubmit").onclick=function(){
   lvSave();$("lvReason").value="";$("lvBox").open=false;LV.f="Pending";lvRender();lvSync()};
 $("lvFrom").value=$("lvTo").value=todayStr();lvType();
 
-/* view switching: Leave tab shows the leave page, other tabs return to the report */
-var view="report";
-function setView(v){view=v;$("reportView").hidden=v==="leave";$("leaveView").hidden=v!=="leave";
+/* bottom nav */
+var links=document.querySelectorAll("nav a");
+
+/* view switching: each nav tab shows only its section */
+var view="top";
+var SECTIONS=["sales","pending","expenses","todo"];
+function setSection(s){
+  /* hero + kpis: full on summary, hidden on all others */
+  var isSummary=s==="top";
+  $("hero").style.display=isSummary?"":"none";
+  $("kpis").style.display=isSummary?"":"none";
+  SECTIONS.forEach(function(id){$(id).hidden=!isSummary&&s!==id;});
+  /* Sales: auto-select first day chip and render its detail */
+  if(s==="sales"){
+    cur=0;
+    renderDay();
+    var chips=document.querySelectorAll(".day");
+    if(chips.length){chips[0].classList.add("on");}
+  }
+}
+function setView(v){view=v;
+  $("reportView").hidden=v==="leave";$("leaveView").hidden=v!=="leave";
   $("sub").textContent=v==="leave"?"Leave & permission":"Koovathur";
-  links.forEach(function(a){a.classList.toggle("on",v==="leave"&&a.dataset.s==="leave")})}
+  if(v!=="leave")setSection(v);
+  links.forEach(function(a){a.classList.toggle("on",a.dataset.s===v)});}
 links.forEach(function(a){a.addEventListener("click",function(e){
-  if(a.dataset.s==="leave"){e.preventDefault();setView("leave");lvRender();scrollTo(0,0)}
-  else if(view==="leave"){setView("report");a.classList.add("on")}})});
+  e.preventDefault();
+  var s=a.dataset.s;
+  if(s==="leave"){setView("leave");lvRender();}
+  else{setView(s);}
+  scrollTo(0,0);});});
 
 /* ===== LOGIN / LOGOUT =====
    Demo only: credentials live in LV.users in this file, so anyone can read them. Replace check() with a call to your server.
@@ -969,17 +933,27 @@ function applyUser(){var u=uById(LV.me),ini=u.name.charAt(0).toUpperCase();
   $("uName").textContent=u.name;
   $("uRole").textContent=(u.role==="admin"?"Admin":"Staff")+" · "+APP.name;
   $("delDayBtn").hidden=u.role!=="admin";}
-function saleCheck(){ /* a report date we have not shown before = a new day sale */
-  var last="";try{last=localStorage.getItem("mas_lastsale")||""}catch(e){}
+function saleCheck(){
+  var key="mas_lastsale_"+LV.me,last="";try{last=localStorage.getItem(key)||""}catch(e){}
   if(last===REPORT.date)return;
-  try{localStorage.setItem("mas_lastsale",REPORT.date)}catch(e){}
-  MASReport.push({id:"sale-"+REPORT.date,type:"sale",title:"New day sale: "+short(REPORT.date),text:"Total "+inr(S.total)+" · Cash "+inr(S.cash)+" · Digital "+inr(S.digital)})}
+  try{localStorage.setItem(key,REPORT.date)}catch(e){}
+  var rd=REPORT.date+"-"+LV.me;
+  var _old=REPORT.todos.filter(function(t){return (new Date(REPORT.generatedAt)-new Date(t.created.replace(" ","T")))/864e5>=30}).length;
+  var _et=sum(REPORT.expenses.map(function(e){return e.amount}));
+  var _prev=REPORT.days[1],_diff=_prev?REPORT.days[0].total-_prev.total:0;
+  MASReport.push([
+    {id:"sale-"+rd,type:"sale",title:"New day sale: "+short(REPORT.date),text:"Total "+inr(S.total)+" · Cash "+inr(S.cash)+" · Digital "+inr(S.digital)},
+    {id:"pend-"+rd,type:"pending",title:REPORT.pendingPayments.length+" pending payments",text:"Total "+inr(sum(REPORT.pendingPayments.map(function(p){return p.total})))},
+    {id:"exp-"+rd,type:"expense",title:inr(_et)+" expense today",text:REPORT.expenses.map(function(e){return e.description}).join(", ")},
+    {id:"todo-"+rd,type:"todo",title:_old+" to-dos open over 30 days",text:REPORT.todos.length+" active in total"},
+    {id:"tot-"+rd,type:_diff>=0?"up":"down",title:"Total "+(_diff>=0?"up ":"down ")+inr(Math.abs(_diff)),text:_prev?"vs "+short(_prev.date):""}
+  ]);}
 function alertLabel(){var n=window.Notification;$("alertState").textContent=!n?"Not supported":n.permission==="granted"?"On":n.permission==="denied"?"Blocked":"Off"}
 $("alertBtn").onclick=function(e){e.stopPropagation();var n=window.Notification;if(!n)return;
   if(n.permission==="default")n.requestPermission().then(function(){alertLabel();if(n.permission==="granted")MASBanner({type:"sale",title:"Alerts are on",text:"You will be notified when a new day sale arrives"})});
   else if(n.permission==="granted")MASBanner({type:"sale",title:"Alerts are on",text:"You will be notified when a new day sale arrives"})};
 alertLabel();
-function enter(uid){LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView("report");lvRender();lvSync();saleCheck();scrollTo(0,0);spy()}
+function enter(uid){LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView("top");lvRender();lvSync();saleCheck();scrollTo(0,0);}
 function showLogin(){LVQ="";MASReport.drop("lv-");document.body.classList.add("locked");$("loginScreen").hidden=false;$("lgPass").value="";$("lgErr").textContent="";
   var last="";try{last=localStorage.getItem("mas_lastuser")||""}catch(e){}$("lgUser").value=last;$("lgRem").checked=true;
   setTimeout(function(){(last?$("lgPass"):$("lgUser")).focus()},50)}
@@ -992,7 +966,7 @@ function doLogin(){
 $("lgBtn").onclick=doLogin;
 ["lgUser","lgPass"].forEach(function(id){$(id).addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();doLogin()}})});
 $("logoutBtn").onclick=function(){clearAuth();$("userPop").classList.remove("open");showLogin()};
-$("delDayBtn").onclick=function(e){e.stopPropagation();
+$("delDayBtn").onclick=function(e){if(!e||!e.stopPropagation)return;e.stopPropagation();
   var dm=REPORT.days[cur].date.split('-'),MON={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   var rawDate=dm[2]+'-'+(MON[dm[1]]||'01')+'-'+dm[0];
   if(!confirm('Delete day sale record for '+REPORT.days[cur].date+'?\nThis cannot be undone.'))return;
@@ -1000,7 +974,7 @@ $("delDayBtn").onclick=function(e){e.stopPropagation();
   fetch(SB_URL+'/rest/v1/day_sale_report?date=eq.'+rawDate,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'return=minimal'}})
     .then(function(r){if(r.ok){MASBanner({type:'info',title:'Record deleted',text:REPORT.days[cur].date+' removed from Supabase'});setTimeout(function(){location.reload()},1500);}
       else r.text().then(function(t){MASBanner({type:'alert',title:'Delete failed',text:t.slice(0,80)})});})
-    .catch(function(err){MASBanner({type:'alert',title:'Delete failed',text:String(err).slice(0,80)});});}
+    .catch(function(err){MASBanner({type:'alert',title:'Delete failed',text:String(err).slice(0,80)});});};
 (function(){var a=getAuth(),u=a&&uById(a.uid);if(u)enter(u.id);else showLogin()})();
 setInterval(lvSync,APP.syncSeconds*1000);
 /* ===== PWA: install button + service worker ===== */
