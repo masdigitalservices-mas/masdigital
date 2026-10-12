@@ -147,7 +147,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:22px 16px}
 
 /* bottom nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
-  padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px);display:flex;justify-content:center;z-index:10}
+  padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px);display:flex;justify-content:center;z-index:100;
+  will-change:transform;-webkit-transform:translateZ(0);transform:translateZ(0)}
 nav .in{display:flex;max-width:560px;width:100%}
 nav a{flex:1;text-align:center;color:var(--muted);text-decoration:none;font-size:11px;padding:4px 0;border-radius:10px}
 nav a span{display:block;font-size:19px;line-height:1.2}
@@ -1034,7 +1035,7 @@ $("delDayBtn").onclick=function(e){if(!e||!e.stopPropagation)return;e.stopPropag
     .then(function(r){if(r.ok){MASBanner({type:'info',title:'Record deleted',text:REPORT.days[cur].date+' removed from Supabase'});setTimeout(function(){location.reload()},1500);}
       else r.text().then(function(t){MASBanner({type:'alert',title:'Delete failed',text:t.slice(0,80)})});})
     .catch(function(err){MASBanner({type:'alert',title:'Delete failed',text:String(err).slice(0,80)});});};
-(function(){var a=getAuth(),u=a&&uById(a.uid);if(u)enter(u.id);else showLogin()})();
+(function(){var a=getAuth();if(!a){showLogin();return;}var u=uById(a.uid);if(u){enter(u.id);}else{/* USERS not loaded yet — show content but defer full enter() until after users load */document.body.classList.remove("locked");$("loginScreen").hidden=true;LV.me=a.uid;setView("top");scrollTo(0,0);/* retry applyUser once users are available */var _t=setInterval(function(){var uu=uById(a.uid);if(uu){clearInterval(_t);enter(a.uid);}},100);}})();
 setInterval(lvSync,APP.syncSeconds*1000);
 /* ===== PWA: install button + service worker ===== */
 var deferredInstall=null;
