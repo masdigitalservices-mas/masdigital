@@ -600,7 +600,8 @@ $("pendDays").innerHTML=REPORT.days.map(function(d,i){
   var raw=dm[2]+'-'+(MON[dm[1]]||'01')+'-'+dm[0];
   var pp=parsePending((REPORT.pendingByDate[raw])||{items:[]});
   var pt=sum(pp.map(function(p){return p.total}));
-  return '<button class="day" data-pi="'+i+'"><small>'+short(d.date)+'</small><b class="num">'+inr(pt)+'</b></button>'}).join("");
+  var pc=pt>0?'var(--pos)':pt<0?'var(--neg)':'';
+  return '<button class="day" data-pi="'+i+'"><small>'+short(d.date)+'</small><b class="num"'+(pc?' style="color:'+pc+'"':'')+'>'+inr(Math.abs(pt))+'</b></button>'}).join("");
 $("pendDays").addEventListener("click",function(e){var b=e.target.closest(".day");if(!b)return;
   pendCur=+b.dataset.pi;
   Array.prototype.forEach.call($("pendDays").querySelectorAll(".day"),function(x,i){x.classList.toggle("on",i===pendCur)});
@@ -616,7 +617,8 @@ $("expDays").innerHTML=REPORT.days.map(function(d,i){
   var raw=dm[2]+'-'+(MON[dm[1]]||'01')+'-'+dm[0];
   var exps=(REPORT.expensesByDate&&REPORT.expensesByDate[raw])||[];
   var et2=sum(exps.map(function(e){return e.amount||0}));
-  return '<button class="day" data-ei="'+i+'"><small>'+short(d.date)+'</small><b class="num">'+inr(et2)+'</b></button>'}).join("");
+  var ec=et2>0?'var(--pos)':et2<0?'var(--neg)':'';
+  return '<button class="day" data-ei="'+i+'"><small>'+short(d.date)+'</small><b class="num"'+(ec?' style="color:'+ec+'"':'')+'>'+inr(et2)+'</b></button>'}).join("");
 $("expDays").addEventListener("click",function(e){var b=e.target.closest(".day");if(!b)return;
   expCur=+b.dataset.ei;
   Array.prototype.forEach.call($("expDays").querySelectorAll(".day"),function(x,i){x.classList.toggle("on",i===expCur)});
@@ -960,6 +962,17 @@ function setSection(s){
   $("kpis").style.display=isSummary?"":"none";
   $("foot").style.display=isSummary?"":"none";
   SECTIONS.forEach(function(id){$(id).hidden=!isSummary&&s!==id;});
+  /* On summary, hide detailed day records and standalone sections */
+  if(isSummary){
+    $("detail").style.display="none";
+    $("cmpBox").style.display="none";
+    $("pending").hidden=true;
+    $("expenses").hidden=true;
+    $("todo").hidden=true;
+  } else {
+    $("detail").style.display="";
+    $("cmpBox").style.display="";
+  }
   /* Sales: auto-select first day chip and render its detail */
   if(s==="sales"){
     cur=0;
