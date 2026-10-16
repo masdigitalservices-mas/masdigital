@@ -1138,21 +1138,27 @@ function saleCheck(){
     {id:"todo-"+rd,type:"todo",title:_old+" to-dos open over 30 days",text:REPORT.todos.length+" active in total"},
     {id:"tot-"+rd,type:_diff>=0?"up":"down",title:"Total "+(_diff>=0?"up ":"down ")+inr(Math.abs(_diff)),text:_prev?"vs "+short(_prev.date):""}
   ]);}
-function alertLabel(){var n=window.Notification;$("alertState").textContent=!n?"Not supported":n.permission==="granted"?"On":n.permission==="denied"?"Blocked":"Off"}
+function pushOk(){try{return localStorage.getItem("mas_push_ok")==="1"}catch(e){return false}}
+function pushSet(v){try{if(v)localStorage.setItem("mas_push_ok","1");else localStorage.removeItem("mas_push_ok")}catch(e){}}
+function alertLabel(){var n=window.Notification;$("alertState").textContent=!n?"Not supported":n.permission==="denied"?"Blocked":n.permission==="granted"?(pushOk()?"On":"Tap to finish"):"Off"}
 /* ===== Web Push: save this phone's push address in Supabase so the server can notify it ===== */
-var VAPID_PUBLIC="BJ2TlSL0B_SksWbJSCmu-04WvZtQNT_RYphsLg7paPt-gKvwuVkOWG2zqcnGli7ofswOMSHcZl_doBKofU46AS0";   /* from: npx web-push generate-vapid-keys (public key only) */
+var VAPID_PUBLIC="BK2sYm70TFhaeAsBKcKrFGUbBw48ZDe9FcjSxiC5uZIKVUe4JesVSMq1a8UmlYsJjIlyd7G5cC8YjAoK59Ib_8A";   /* from: npx web-push generate-vapid-keys (public key only) */
 function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 function pushSubscribe(){
   if(!("serviceWorker" in navigator)||!window.PushManager||VAPID_PUBLIC.indexOf("PASTE")===0)return Promise.resolve(false);
   function doSubscribe(reg){
+    var key=vapidBytes(VAPID_PUBLIC);
     return reg.pushManager.getSubscription().then(function(sub){
-      return sub?sub.unsubscribe().then(function(){return null;}):null;
-    }).then(function(){
-      return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)});
+      if(!sub)return null;
+      var cur=sub.options&&sub.options.applicationServerKey;
+      var same=!cur||(cur.byteLength===key.length&&new Uint8Array(cur).every(function(b,i){return b===key[i]}));
+      return same?sub:sub.unsubscribe().then(function(){return null});
+    }).then(function(sub){
+      return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
     }).then(function(sub){
       var u=uById(LV.me);
       return fetch(SB_URL+"/rest/v1/push_subscriptions",{method:"POST",
-        headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},
+        headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=ignore-duplicates,return=minimal"},
         body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){
           if(!r.ok)return r.text().then(function(t){console.error("push_subscriptions save failed:",r.status,t);return false;});
           return true;
@@ -1165,10 +1171,13 @@ function pushSubscribe(){
     .then(doSubscribe)
     .catch(function(e){console.error("pushSubscribe error:",e);return false;});
 }
-function alertOn(){alertLabel();pushSubscribe().then(function(done){
-  if(done)MASBanner({type:"sale",title:"✅ Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});
-  else MASBanner({type:"alert",title:"❌ Push registration failed",text:"Could not save this phone to the server. In-app alerts only. Check console for details."});
-}).catch(function(err){MASBanner({type:"alert",title:"❌ Push error",text:String(err).slice(0,120)})});}
+function alertOn(){alertLabel();
+  if(!("serviceWorker" in navigator)||!window.PushManager){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+    MASBanner({type:"alert",title:"Push not available",text:ios?"On iPhone, add this app to the Home Screen and open it from there, then tap Phone alerts again.":"This browser does not support push alerts."});return}
+pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
+  if(done)MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});
+  else MASBanner({type:"alert",title:"Push registration failed",text:"Could not save this phone to the server. In-app alerts only. Check console for details."});
+}).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
   if(n.permission==="default")n.requestPermission().then(function(){if(n.permission==="granted")alertOn();else alertLabel()});
@@ -1176,7 +1185,7 @@ document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))
   else if(n.permission==="denied"){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
     alert("Alerts are blocked for this app, and the app cannot ask again.\n\nTo turn them on:\n"+(ios
       ?"1. Open iPhone Settings and scroll down to this app (or Settings > Notifications > this app).\n2. Turn on Allow Notifications.\n3. Reopen the app, go to Setup and tap Phone alerts."
-      :"1. Long-press the app icon on your home screen and tap App info (or open Settings > Apps > this app).\n2. Tap Notifications and turn them on.\n3. If it is still blocked: open Chrome > Settings > Site settings > Notifications, find this site and set it to Allow.\n4. Reopen the app, go to Setup and tap Phone alerts.\n\nLast resort: uninstall the app, install it again and tap Phone alerts."))}};
+      :"1. Long-press the app icon on your home screen and tap App info (or open Settings > Apps > this app).\n2. Tap Notifications and turn them on.\n3. If it is still blocked: open Chrome > Settings > Site settings > Notifications, find this site and set it to Allow.\n4. Reopen the app, go to Setup and tap Phone alerts.\n\nLast resort: uninstall the app, install it again and tap Phone alerts."))}});
 window.addEventListener("focus",function(){alertLabel()});
 alertLabel();
 function enter(uid){hideLoader();LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");MASReport.drop("dev-queue");DVQ="";applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView(START);START="top";lvRender();lvSync();devLoad();saleCheck();_scrollTop();if(window.LOADERR)MASBanner({type:"alert",title:"Could not load data",text:"Check your connection and reload"});}
@@ -1416,7 +1425,7 @@ if(_inStandalone)$("installBtn").hidden=true;
 window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredInstall=e;if(!_inStandalone)$("installBtn").hidden=false});
 window.addEventListener("appinstalled",function(){deferredInstall=null;$("installBtn").hidden=true});
 $("installBtn").onclick=function(ev){ev.stopPropagation();
-  if(!deferredInstall){MASBanner({type:"info",title:"Install",text:"Use your browser menu → 'Add to Home Screen' to install"});return}
+  if(!deferredInstall){MASBanner({type:"info",title:"Install",text:"Use your browser menu > Add to Home Screen to install"});return}
   deferredInstall.prompt();deferredInstall.userChoice.then(function(){deferredInstall=null;$("installBtn").hidden=true})};
 if("serviceWorker" in navigator&&/^https?:/.test(location.protocol))window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js")});window.addEventListener("storage",lvSync);
 } // end renderPage
