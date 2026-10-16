@@ -1156,17 +1156,11 @@ function pushSubscribe(){
         body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){return r.ok});
     });
   }
-  return navigator.serviceWorker.register('sw.js').then(function(reg){
-    if(reg.active&&!navigator.serviceWorker.controller){
-      if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
-      if(reg.installing)reg.installing.postMessage({type:'SKIP_WAITING'});
-      return new Promise(function(resolve){
-        var t=setTimeout(function(){resolve(reg);},4000);
-        navigator.serviceWorker.addEventListener('controllerchange',function(){clearTimeout(t);resolve(reg);});
-      });
-    }
-    return reg;
-  }).then(doSubscribe).catch(function(e){alert('push error: '+e);return false}).then(function(r){window._pushPending=false;return r;});
+  navigator.serviceWorker.register('sw.js');
+  return navigator.serviceWorker.ready
+    .then(doSubscribe)
+    .catch(function(e){alert('push error: '+e);return false})
+    .then(function(r){window._pushPending=false;return r;});
 }
 function alertOn(){alertLabel();pushSubscribe().then(function(done){MASBanner({type:"sale",title:"Alerts are on",
   text:done?"This phone will be notified when a new day sale is saved":"Phone push is not set up yet - in-app alerts only"})})}
