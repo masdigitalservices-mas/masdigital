@@ -1144,8 +1144,7 @@ var VAPID_PUBLIC="BJ2TlSL0B_SksWbJSCmu-04WvZtQNT_RYphsLg7paPt-gKvwuVkOWG2zqcnGli
 function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 function pushSubscribe(){
   if(!("serviceWorker" in navigator)||!window.PushManager||VAPID_PUBLIC.indexOf("PASTE")===0)return Promise.resolve(false);
-  window._pushPending=false;
-  function doSubscribe(reg){
+  window._pushPending=false;  function doSubscribe(reg){
     return reg.pushManager.getSubscription().then(function(sub){
       return sub?sub.unsubscribe().then(function(){return null;}):null;
     }).then(function(){
@@ -1154,17 +1153,18 @@ function pushSubscribe(){
       var u=uById(LV.me);
       return fetch(SB_URL+"/rest/v1/push_subscriptions",{method:"POST",
         headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},
-        body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){alert('save: '+r.status);return r.ok});
+        body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){return r.ok});
     });
   }
   navigator.serviceWorker.register('sw.js');
   return navigator.serviceWorker.ready
-    .then(function(reg){alert('SW ready, subscribing...');return doSubscribe(reg);})
-    .catch(function(e){alert('push error: '+e);return false;});
+    .then(doSubscribe)
+    .catch(function(e){return false;});
 }
 function alertOn(){alertLabel();pushSubscribe().then(function(done){MASBanner({type:"sale",title:"Alerts are on",
   text:done?"This phone will be notified when a new day sale is saved":"Phone push is not set up yet - in-app alerts only"})})}
-$("alertBtn").onclick=function(e){e.stopPropagation();var n=window.Notification;if(!n)return;
+$("alertBtn").onclick=null;
+document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
   if(n.permission==="default")n.requestPermission().then(function(){if(n.permission==="granted")alertOn();else alertLabel()});
   else if(n.permission==="granted")alertOn();
   else if(n.permission==="denied"){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
