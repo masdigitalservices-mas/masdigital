@@ -29,12 +29,12 @@
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg)}
 body{color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
 .app{max-width:560px;margin:0 auto;height:100%;display:flex;flex-direction:column}
-#scrollArea{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#scrollArea{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .num{font-variant-numeric:tabular-nums;font-size:0.92em}
 
 /* top */
 .top{background:linear-gradient(160deg,#0e7490,#155e75);color:#fff;
-  padding:calc(env(safe-area-inset-top,0px) + 16px) 18px 74px;border-radius:0 0 26px 26px}
+  padding:calc(env(safe-area-inset-top,0px) + 6px) 18px 44px;border-radius:0 0 26px 26px}
 .brand{display:flex;align-items:center;gap:12px}
 .logo{width:42px;height:42px;display:block;border-radius:20px}
 .brand h1{margin:0;font-size:clamp(14px,4.4vw,17px);font-weight:700;white-space:nowrap}
@@ -43,7 +43,7 @@ body{color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,A
 .theme{margin-left:auto;border:0;background:#ffffff26;color:#fff;border-radius:12px;width:38px;height:38px;font-size:17px}
 
 /* hero */
-.hero{margin:-54px 14px 0;background:var(--card);border-radius:var(--r);padding:18px;box-shadow:0 8px 24px #0f2a3a1f}
+.hero{margin:-38px 14px 0;background:var(--card);border-radius:var(--r);padding:7px 16px;box-shadow:0 8px 24px #0f2a3a1f}
 .hero .lbl{color:var(--muted);font-size:13px}
 .hero .big{font-size:34px;font-weight:800;color:var(--total);letter-spacing:-.5px;margin-top:2px}
 .delta{display:inline-block;margin-top:6px;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--chip)}
@@ -54,7 +54,7 @@ body{color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,A
 .legend b{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
 
 /* kpi */
-.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px 14px 2px}
 .kpi{border-radius:16px;padding:13px 14px;color:#fff;min-height:74px}
 .kpi small{display:block;font-size:12px;opacity:.9}
 .kpi strong{display:block;font-size:19px;margin-top:4px}
@@ -67,7 +67,9 @@ h2 em{font-style:normal;font-size:13px;font-weight:600;color:var(--muted)}
 .card{background:var(--card);border-radius:var(--r);box-shadow:0 1px 3px #0f2a3a14;overflow:hidden}
 
 /* day cards */
-.days{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:2px 0 10px}
+.days{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 16px)/3);gap:8px;padding:2px 0 10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.days .day{scroll-snap-align:start;min-width:0}
 .day{border:0;background:var(--chip);color:var(--text);border-radius:14px;padding:10px 8px;text-align:center;font:inherit;cursor:pointer;transition:background .15s}
 .day small{display:block;color:var(--muted);font-size:10.5px;margin-bottom:4px}
 .day b{display:block;font-size:12px;font-weight:700}
@@ -224,6 +226,7 @@ nav a.on span{background:color-mix(in srgb,var(--brand) 16%,transparent)}
 .hrow{display:flex;align-items:center;gap:6px}
 .hl{flex:1;min-width:0}
 .hero .big{font-size:30px}
+#sales>h2{margin-top:4px}
 .donut{width:112px;height:112px;flex:none}
 /* cash / pending / expense strip: same layout, coloured with a different font style */
 .sumline.c div{padding:11px 6px 10px;box-shadow:inset 0 -3px 0 var(--c);background:color-mix(in srgb,var(--c) 7%,transparent)}
@@ -244,6 +247,69 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 .lgrem input{width:18px;height:18px;accent-color:var(--brand)}
 .lgcard .btn{width:100%;margin-top:4px}
 .lgerr{color:var(--neg);font-size:12.5px;min-height:18px;margin-bottom:6px;text-align:center}
+.lgpend{border:1px solid var(--line,#ccc);border-radius:12px;padding:12px;margin-bottom:10px;text-align:center;font-size:12.5px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.lgpend[hidden]{display:none}
+.lgpend code{font-size:12px;letter-spacing:.5px}
+.dvov{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;align-items:stretch;justify-content:center}
+.dvov[hidden]{display:none}
+.dvsh{background:var(--bg);color:var(--text);width:100%;max-width:560px;height:100%;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+#stBody{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+.dvrow{background:var(--card)}
+.dvrow button.row2{width:100%;border:0;background:none;color:var(--text);font:inherit;text-align:left;padding:12px 2px;display:flex;justify-content:space-between;border-bottom:1px solid var(--line)}
+.dvrow button.row2:last-child{border-bottom:0}
+.dvrow button.row2.out{color:var(--neg)}
+.dvrow button.row2[hidden]{display:none}
+.dvrow input.dvsel{flex:2;min-width:0}
+#delOv{position:fixed;inset:0;z-index:320;background:#0008;display:flex;align-items:flex-end;justify-content:center}
+#delOv[hidden]{display:none}
+#delOv .dlsh{background:var(--card);color:var(--text);width:100%;max-width:560px;max-height:80%;border-radius:18px 18px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px}
+#delList{overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+#delList button{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit;padding:12px;text-align:left}
+#delList button.on{border-color:var(--neg);background:var(--chip)}
+#delList small{color:var(--muted)}
+#delGo{background:var(--neg)!important;color:#fff!important}
+#delGo:disabled{opacity:.45}
+#appLoader{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .25s}
+#appLoader.done{opacity:0;pointer-events:none}
+#appLoader .lring{position:relative;width:104px;height:104px;display:flex;align-items:center;justify-content:center}
+#appLoader .lring img{width:76px;height:76px;border-radius:50%;object-fit:cover;animation:lspin 2.6s linear infinite}
+#appLoader .spin{position:absolute;inset:0;border-radius:50%;border:4px solid var(--line);border-top-color:var(--brand);animation:lspin 1s linear infinite reverse}
+#appLoader small{color:var(--muted);font-size:12.5px}
+@keyframes lspin{to{transform:rotate(360deg)}}
+/* ===== ANIMATIONS (test) - delete everything from here to "END ANIMATIONS" (and the ani() lines in the script) to revert ===== */
+@keyframes aUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes aPop{from{opacity:0;transform:translateY(6px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes aDonut{from{opacity:0;transform:rotate(-120deg) scale(.7)}to{opacity:1;transform:none}}
+@keyframes aBounce{0%{transform:scale(1)}40%{transform:scale(1.22) translateY(-2px)}100%{transform:scale(1)}}
+/* replayed from JS (ani()) on every tab change, day tap and app open */
+.hero.aH{animation:aUp .5s cubic-bezier(.2,.8,.2,1) both}
+.hero.aH .hrow{animation:aUp .45s .05s cubic-bezier(.2,.8,.2,1) both}
+.hero.aH .big{animation:aPop .55s .12s cubic-bezier(.2,.8,.2,1) both}
+.hero.aH .donut{animation:aDonut .9s .1s cubic-bezier(.2,.8,.2,1) both}
+.aS{animation:aUp .4s cubic-bezier(.2,.8,.2,1) both}
+.aS .days>*{animation:aUp .45s .08s cubic-bezier(.2,.8,.2,1) both}
+.aS .days>*:nth-child(2){animation-delay:.13s}.aS .days>*:nth-child(3){animation-delay:.18s}.aS .days>*:nth-child(4){animation-delay:.23s}.aS .days>*:nth-child(n+5){animation-delay:.28s}
+/* tap feedback */
+#bottomNav a[data-s].on{animation:aBounce .35s ease}
+#bottomNav a[data-s],.row2,.btn,.chip,.days>*{transition:transform .12s ease}
+#bottomNav a[data-s]:active,.row2:active,.btn:active,.chip:active,.days>*:active{transform:scale(.92)}
+@media (prefers-reduced-motion:reduce){.hero.aH,.hero.aH *,.aS,.aS .days>*,#bottomNav a[data-s].on{animation:none!important}}
+/* ===== END ANIMATIONS ===== */
+.dvtabs button{font-size:12px;padding:8px 2px}
+.dvhd{display:flex;justify-content:space-between;align-items:center}
+.dvhd button{border:0;background:none;color:var(--muted);font-size:18px;padding:4px 8px}
+.dvtabs{display:flex;gap:6px}
+.dvtabs button{flex:1;border:0;border-radius:10px;background:var(--chip);color:var(--text);font:inherit;font-size:12.5px;padding:8px 4px}
+.dvtabs button.on{background:var(--brand);color:#fff;font-weight:700}
+:root[data-theme="dark"] .dvtabs button.on,:root[data-theme="dark"] .dvact button.pri{color:#06222b}
+.dvsel{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit;padding:9px}
+#dvList{overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:env(safe-area-inset-bottom,0px)}
+.dvrow{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.dvrow small{color:var(--muted);font-size:11.5px}
+.dvact{display:flex;gap:8px}
+.dvact button{flex:1;border:0;border-radius:10px;font:inherit;font-weight:700;padding:9px;background:var(--chip);color:var(--text)}
+.dvact button.pri{background:var(--brand);color:#fff}
+.dvact button.bad{color:var(--neg)}
 .lghint{margin-top:14px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.5}
 .pop button.row2.out{color:var(--neg);border-top:1px solid var(--line)}
 .lvrj{display:flex;gap:8px;margin-top:8px}
@@ -269,10 +335,13 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 .lvform{margin-top:10px}
 .lvform summary{list-style:none;cursor:pointer;padding:14px;font-weight:700;color:var(--brand)}
 .lvform summary::-webkit-details-marker{display:none}
-.lvf{padding:0 14px 14px;display:grid;gap:10px;box-sizing:border-box;width:100%}
+.lvf{padding:0 12px 14px;display:grid;gap:10px;box-sizing:border-box;width:100%;max-width:100%;min-width:0}
+.lvf label{min-width:0}
+.lvf input,.lvf select,.lvf textarea,.lvf button{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.lvf input[type=date],.lvf input[type=time]{display:block;min-height:42px;-webkit-appearance:none;appearance:none}
 .lvf label{display:block;font-size:12px;color:var(--muted);font-weight:600}
 .lvf label>*{margin-top:4px;font-weight:400}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .lverr{color:var(--neg);font-size:12.5px;min-height:0}
 .btn{border:0;border-radius:12px;background:var(--brand);color:#fff;font:inherit;font-weight:700;padding:12px}
 :root[data-theme="dark"] .btn{color:#06222b}
@@ -294,6 +363,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 </style>
 </head>
 <body class="locked">
+<div id="appLoader" role="status" aria-label="Loading"><div class="lring"><span class="spin"></span><img src="icons/MASLogoRound.jpg" alt="MAS"></div><small>Loading…</small></div>
 <div class="toast" id="toast" hidden></div>
 <div id="loginScreen">
  <div class="lgcard" id="lgForm">
@@ -304,6 +374,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
   <label id="lgPassRow" class="lgpw">Password<input type="password" id="lgPass" autocomplete="current-password"><button type="button" id="lgShow">Show</button></label>
   <label class="lgrem" id="lgRemRow"><input type="checkbox" id="lgRem" checked>Remember me on this device</label>
   <div class="lgerr" id="lgErr"></div>
+  <div class="lgpend" id="lgPend" hidden><b>Waiting for admin approval</b><span>This device is new. Ask the admin to approve it, then tap Check again.</span><code id="lgDev"></code><button class="btn" id="lgChk" type="button">Check again</button></div>
   <button class="btn" id="lgBtn" type="button">Sign in</button>
   <p class="lghint" id="lgHint"></p>
  </div>
@@ -393,9 +464,21 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 </div>
 
 <div class="pop" id="notifPop"><h3 id="ntTitle">Notifications <small id="ntSub"></small><button id="ntClearAll" style="border:0;background:none;color:var(--neg);font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0 0 0 8px;margin-left:auto">Clear all</button></h3><div id="ntList"></div></div>
-<div class="pop" id="userPop"><div class="who"><span class="avatar" id="avBig"></span><div><b id="uName"></b><small id="uRole">MAS Digital Service</small></div></div><button class="row2" id="themeBtn"><span>Dark / light mode</span><span>◐</span></button><button class="row2" id="installBtn" hidden><span>Install app</span><span>⬇</span></button><button class="row2" id="alertBtn"><span>Phone alerts</span><span id="alertState">Off</span></button><button class="row2 out" id="delDayBtn" hidden><span id="delDayLabel">Delete day record</span><span>🗑</span></button><button class="row2 out" id="logoutBtn"><span>Log out</span><span>⎋</span></button></div>
+<div class="pop" id="userPop"><div class="who"><span class="avatar" id="avBig"></span><div><b id="uName"></b><small id="uRole">MAS Digital Service</small></div></div><button class="row2" id="setupBtn"><span>Setup</span><span><small id="devCnt" style="color:var(--neg);font-weight:700"></small> &#9881;</span></button><button class="row2 out" id="logoutBtn"><span>Log out</span><span>⎋</span></button></div>
 
 
+<div class="dvov" id="dvOv" hidden><div class="dvsh">
+  <div class="dvhd"><button id="dvClose" aria-label="Back">&#8592;</button><b id="dvTitle">Setup</b><span style="width:34px"></span></div>
+  <div class="dvtabs" id="stNav" hidden></div>
+  <div id="stBody"></div>
+</div></div>
+<div id="stStash" hidden><button class="row2" id="themeBtn"><span>Dark / light mode</span><span>◐</span></button><button class="row2" id="installBtn" hidden><span>Install app</span><span>⬇</span></button><button class="row2" id="alertBtn"><span>Phone alerts</span><span id="alertState">Off</span></button><button class="row2 out" id="delDayBtn" hidden><span id="delDayLabel">Delete day record</span><span>🗑</span></button></div>
+<div id="delOv" hidden><div class="dlsh">
+  <div class="dvhd"><b>Delete day record</b><button id="delClose" aria-label="Close">&#10005;</button></div>
+  <small style="color:var(--muted)">Pick the day you want to delete. This cannot be undone.</small>
+  <div id="delList"></div>
+  <button class="btn" id="delGo" disabled>Select a day</button>
+</div></div>
 <script>
 /* =====================================================================
    SUPABASE CONFIG — set your project URL and anon key here
@@ -459,7 +542,7 @@ function buildReport(j){
   var g=new Date(j.generatedAt),h=g.getHours(),sm=j.daySaleSummary;
   var at=(g.getMonth()+1)+"/"+g.getDate()+"/"+g.getFullYear()+" "+((h%12)||12)+":"+("0"+g.getMinutes()).slice(-2)+":"+("0"+g.getSeconds()).slice(-2)+" "+(h<12?"AM":"PM");
   return {
-    date:d(j.date), generatedBy:j.generatedBy||'', generatedAt:at,
+    date:d(j.date), generatedBy:j.generatedBy||'', generatedAt:at, generatedISO:j.generatedAt,
     summary:{cash:sm.cash,digital:sm.digital,wallet:sm.wallet,pending:sm.pending,expense:sm.expense,total:sm.total,
       totalSales:j.last5DaySales&&j.last5DaySales.length>1?(sm.total-(j.last5DaySales[1].Total||0)+(j.last5DaySales[1].Expense||0)):sm.totalSales||0},
     channels:ch,
@@ -472,11 +555,17 @@ function buildReport(j){
   };
 }
 
+/* ===== App loader (rotating icon): shown from first paint, hidden once the app has decided between login and the app ===== */
+function hideLoader(){var l=document.getElementById("appLoader");if(!l||l.dataset.d)return;l.dataset.d=1;
+  var w=Math.max(0,1500-(window.performance&&performance.now?performance.now():1500));   /* keep it visible at least ~1.5s from page start */
+  setTimeout(function(){l.classList.add("done");if(window.MASAni)MASAni();setTimeout(function(){l.remove()},300)},w)}
+setTimeout(hideLoader,12000);   /* safety: never leave the spinner stuck */
 /* ===== Fetch from Supabase first, fall back to hardcoded DAILY_JSON ===== */
 (function(){
   var sbHeaders = { 'apikey': SB_ANON, 'Authorization': 'Bearer '+SB_ANON };
 
-  function init(json, users){
+  function init(json, users, err){
+    window.LOADERR = !!err;
     // Override USERS with live data if available
     if(users && users.length) USERS = users;
     var REPORT = buildReport(json);
@@ -490,16 +579,18 @@ function buildReport(j){
   // Fetch latest 5 report rows + user credentials in parallel
   Promise.all([
     fetch(SB_URL+'/rest/v1/day_sale_report?select=date,data&order=date.desc&limit=10', {headers: sbHeaders})
-      .then(function(r){ return r.json(); }),
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok || !Array.isArray(j)) throw new Error('report'); return j; }); }),
     fetch(SB_URL+'/rest/v1/user_credentials?select=*', {headers: sbHeaders})
-      .then(function(r){ return r.json(); })
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok || !Array.isArray(j)){ window.USERERR='HTTP '+r.status+(j&&j.message?' - '+j.message:''); throw new Error('users'); } return j; }); })
+      .catch(function(){ if(!window.USERERR) window.USERERR='network blocked or offline'; return null; })
   ])
   .then(function(results){
     var reportRows = results[0], credRows = results[1];
-    if(!reportRows || !reportRows.length){ init(DAILY_JSON, null); return; }
+    if((!credRows || !credRows.length) && !window.USERERR) window.USERERR='user_credentials returned no rows (check table / RLS policy)';
+    if(!reportRows || !reportRows.length){ init(DAILY_JSON, null, true); return; }
     // find the newest row that has valid data
     var validRows = reportRows.filter(function(r){ return r.data && r.data.date; });
-    if(!validRows.length){ init(DAILY_JSON, null); return; }
+    if(!validRows.length){ init(DAILY_JSON, null, true); return; }
     // sort by date descending to ensure correct order regardless of DB ordering
     validRows.sort(function(a,b){ return b.data.date < a.data.date ? -1 : b.data.date > a.data.date ? 1 : 0; });
     // cap to 5 for the day chips
@@ -540,7 +631,7 @@ function buildReport(j){
     }
     init(json, users);
   })
-  .catch(function(){ init(DAILY_JSON, null); });
+  .catch(function(e){ if(!window.USERERR) window.USERERR='network blocked or offline'; init(DAILY_JSON, null, true); });
 })();
 
 function renderPage(REPORT){
@@ -572,9 +663,9 @@ $("hero").innerHTML =
   '</div><svg class="donut" viewBox="0 0 120 120" id="donut"></svg></div>';
 (function(){
   var seg=[["Cash",S.cash,"var(--cash)"],["Digital",S.digital,"var(--digital)"],["Wallet",S.wallet,"var(--wallet)"]],t=sum(seg.map(function(x){return x[1]})),C=2*Math.PI*44,off=0,h='<defs><path id="dpt" d="M60 19A41 41 0 0 1 60 101A41 41 0 0 1 60 19"/><path id="dpb" d="M60 107A47 47 0 0 0 60 13A47 47 0 0 0 60 107"/></defs><circle cx="60" cy="60" r="44" fill="none" stroke="var(--chip)" stroke-width="16"/>',L='';
-  seg.forEach(function(x,i){var l=x[1]/t*C;h+='<circle data-i="'+i+'" cx="60" cy="60" r="44" fill="none" stroke="'+x[2]+'" stroke-width="16" stroke-dasharray="'+Math.max(l-2,0)+' '+C+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 60 60)"/>';
-    if(x[1]/t>.06){var th=(off+l/2)/C*360,bot=th>90&&th<270,off2=bot?((180-th+360)%360)/360*2*Math.PI*47:th/360*2*Math.PI*41;
-      L+='<text font-size="8.5" font-weight="700" style="fill:#fff;pointer-events:none"><textPath href="#'+(bot?'dpb':'dpt')+'" startOffset="'+off2.toFixed(1)+'">'+Math.round(x[1]/t*100)+'%</textPath></text>'}
+  seg.forEach(function(x,i){var l=x[1]/(t||1)*C;h+='<circle data-i="'+i+'" cx="60" cy="60" r="44" fill="none" stroke="'+x[2]+'" stroke-width="16" stroke-dasharray="'+Math.max(l-2,0)+' '+C+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 60 60)"/>';
+    if(x[1]/(t||1)>.06){var th=(off+l/2)/C*360,bot=th>90&&th<270,off2=bot?((180-th+360)%360)/360*2*Math.PI*47:th/360*2*Math.PI*41;
+      L+='<text font-size="8.5" font-weight="700" style="fill:#fff;pointer-events:none"><textPath href="#'+(bot?'dpb':'dpt')+'" startOffset="'+off2.toFixed(1)+'">'+Math.round(x[1]/(t||1)*100)+'%</textPath></text>'}
     off+=l});
   function ctr(a,b){return h+L+'<text x="60" y="56" font-size="9" style="fill:var(--muted)">'+a+'</text><text x="60" y="71" font-size="14" font-weight="800">'+b+'</text>'}
   var d=$("donut");d.innerHTML=ctr("Collected",inr(t));
@@ -594,7 +685,7 @@ $("days").innerHTML = REPORT.days.map(function(d,i){
 $("days").addEventListener("click",function(e){var b=e.target.closest(".day");if(b){cur=+b.dataset.i;renderDay()}});
 
 /* pending day cards */
-var pendCur=0;
+var cur=0,pendCur=0;
 $("pendDays").innerHTML=REPORT.days.map(function(d,i){
   var dm=d.date.split('-'),MON={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   var raw=dm[2]+'-'+(MON[dm[1]]||'01')+'-'+dm[0];
@@ -636,7 +727,7 @@ $("expDays").addEventListener("click",function(e){var b=e.target.closest(".day")
   var d=REPORT.days.map(function(x){var w=0,g=0;REPORT.channels.forEach(function(n,i){if(WAL.indexOf(n)>=0)w+=x.v[i];else g+=x.v[i]});
     return {l:short(x.date),c:x.cash,g:g,w:w,p:x.pending,e:x.expense}});
   /* one stacked bar per day: cash + digital + wallet + pending + expense */
-  var mx=Math.max.apply(0,d.map(function(x){return x.c+x.g+x.w+x.p+x.e})),W=300,bw=30,gap=(W-d.length*bw)/(d.length+1),h='',B=118,K=84;
+  var mx=Math.max.apply(0,d.map(function(x){return x.c+x.g+x.w+x.p+x.e}))||1,W=300,bw=30,gap=(W-d.length*bw)/(d.length+1),h='',B=118,K=84;
   [0,.5,1].forEach(function(f){var y=B-f*K;h+='<line x1="0" x2="300" y1="'+y+'" y2="'+y+'" stroke="var(--line)" stroke-dasharray="3 4"/>'});
   d.forEach(function(x,i){var X=gap+i*(bw+gap),cx=X+bw/2,y=B,tot=x.c+x.g+x.w+x.p+x.e;
     [[x.c,"var(--cash)"],[x.g,"var(--digital)"],[x.w,"var(--wallet)"],[x.p,"var(--pending)"],[x.e,"var(--expense)"]].forEach(function(s){if(!s[0])return;var hh=Math.max(s[0]/mx*K,1.5);y-=hh;h+='<rect x="'+X+'" y="'+y+'" width="'+bw+'" height="'+hh+'" fill="'+s[1]+'"/>'});
@@ -667,7 +758,7 @@ function renderPending(items){
 }
 function renderDay(){
   var d=REPORT.days[cur];
-  Array.prototype.forEach.call(document.querySelectorAll(".day"),function(b,i){b.classList.toggle("on",i===cur)});
+  Array.prototype.forEach.call($("days").querySelectorAll(".day"),function(b,i){b.classList.toggle("on",i===cur)});
 
   /* update hero total + delta */
   var prevD=REPORT.days[cur+1];
@@ -675,16 +766,16 @@ function renderDay(){
   $("heroLabel").textContent="Total for "+d.date;
   $("heroTotal").textContent=inr(d.total);
   var delta=$("heroDelta");
-  if(delta&&prevD){delta.className="delta "+(diff2>=0?"up":"down");delta.textContent=(diff2>=0?"▲ ":"▼ ")+inr(Math.abs(diff2))+" vs "+short(prevD.date);}
+  if(delta){if(prevD){delta.className="delta "+(diff2>=0?"up":"down");delta.textContent=(diff2>=0?"▲ ":"▼ ")+inr(Math.abs(diff2))+" vs "+short(prevD.date);delta.style.display=""}else delta.style.display="none"}
   /* update donut for selected day */
   (function(){
     var WALd=APP.walletChannels,dig3=0,wal3=0;
     REPORT.channels.forEach(function(n,i){if(WALd.indexOf(n)>=0)wal3+=d.v[i];else dig3+=d.v[i];});
     var seg3=[["Cash",d.cash,"var(--cash)"],["Digital",dig3,"var(--digital)"],["Wallet",wal3,"var(--wallet)"]],t3=sum(seg3.map(function(x){return x[1]})),C3=2*Math.PI*44,off3=0;
     var h3='<defs><path id="dpt" d="M60 19A41 41 0 0 1 60 101A41 41 0 0 1 60 19"/><path id="dpb" d="M60 107A47 47 0 0 0 60 13A47 47 0 0 0 60 107"/></defs><circle cx="60" cy="60" r="44" fill="none" stroke="var(--chip)" stroke-width="16"/>',L3='';
-    seg3.forEach(function(x,i){var l=x[1]/t3*C3;h3+='<circle data-i="'+i+'" cx="60" cy="60" r="44" fill="none" stroke="'+x[2]+'" stroke-width="16" stroke-dasharray="'+Math.max(l-2,0)+' '+C3+'" stroke-dashoffset="'+(-off3)+'" transform="rotate(-90 60 60)"/>';
-      if(x[1]/t3>.06){var th=(off3+l/2)/C3*360,bot=th>90&&th<270,off2b=bot?((180-th+360)%360)/360*2*Math.PI*47:th/360*2*Math.PI*41;
-        L3+='<text font-size="8.5" font-weight="700" style="fill:#fff;pointer-events:none"><textPath href="#'+(bot?'dpb':'dpt')+'" startOffset="'+off2b.toFixed(1)+'">'+Math.round(x[1]/t3*100)+'%</textPath></text>'}
+    seg3.forEach(function(x,i){var l=x[1]/(t3||1)*C3;h3+='<circle data-i="'+i+'" cx="60" cy="60" r="44" fill="none" stroke="'+x[2]+'" stroke-width="16" stroke-dasharray="'+Math.max(l-2,0)+' '+C3+'" stroke-dashoffset="'+(-off3)+'" transform="rotate(-90 60 60)"/>';
+      if(x[1]/(t3||1)>.06){var th=(off3+l/2)/C3*360,bot=th>90&&th<270,off2b=bot?((180-th+360)%360)/360*2*Math.PI*47:th/360*2*Math.PI*41;
+        L3+='<text font-size="8.5" font-weight="700" style="fill:#fff;pointer-events:none"><textPath href="#'+(bot?'dpb':'dpt')+'" startOffset="'+off2b.toFixed(1)+'">'+Math.round(x[1]/(t3||1)*100)+'%</textPath></text>'}
       off3+=l});
     function ctr3(a,b){return h3+L3+'<text x="60" y="56" font-size="9" style="fill:var(--muted)">'+a+'</text><text x="60" y="71" font-size="14" font-weight="800">'+b+'</text>'}
     var dn=$("donut");dn.innerHTML=ctr3("Collected",inr(t3));
@@ -758,7 +849,10 @@ $("todoList").innerHTML = REPORT.todos.map(function(t){
   var cls=days>=30?"old":days>=7?"mid":"", label=days===0?"Today":days===1?"1 day":days<60?days+" days":Math.floor(days/30)+" months";
   return '<div class="todo"><span class="dot"></span><div><b>'+esc(t.task)+'</b><small>Created '+esc(t.created.slice(0,16))+'</small></div><span class="age '+cls+'">'+label+'</span></div>'}).join("");
 
-$("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generatedAt;
+/* footer date: dd MMM yyyy hh:mm am/pm */
+function fmtGen(v,fb){var g=new Date(v);if(isNaN(g))return fb;var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],h=g.getHours();
+  return("0"+g.getDate()).slice(-2)+" "+M[g.getMonth()]+" "+g.getFullYear()+" "+("0"+((h%12)||12)).slice(-2)+":"+("0"+g.getMinutes()).slice(-2)+" "+(h<12?"am":"pm")}
+$("foot").textContent = "Generated by "+REPORT.generatedBy+" : "+fmtGen(REPORT.generatedISO,REPORT.generatedAt);
 
 /* ===== NOTIFICATIONS (real-time) — settings are in the NOTIFY block at the top of this script ===== */
 (function(){
@@ -806,7 +900,7 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
     });
   }
   $("ntList").addEventListener('click',function(e){var b=e.target.closest('[data-clr]');if(b){e.stopPropagation();dismiss(b.dataset.clr);}});
-  $("ntClearAll").onclick=function(e){e.stopPropagation();items=[];read={};save();render();};
+  $("ntClearAll").onclick=function(e){e.stopPropagation();items.forEach(function(n){read[n.id]=1});items=[];save();render();};
   function ring(){bell.classList.remove("ring");void bell.offsetWidth;bell.classList.add("ring");$("badge").classList.remove("pulse");void $("badge").offsetWidth;$("badge").classList.add("pulse")}
 
   /* WhatsApp-style heads-up banner; when the app is in the background it also uses the phone's own notification if allowed */
@@ -817,7 +911,7 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
     el.innerHTML='<span class="d" style="background:'+t[0]+'">'+t[1]+'</span><div style="flex:1;min-width:0"><b>'+esc(n.title)+'</b><small>'+esc(n.text)+'</small></div><small class="tm">now</small>';
     el.hidden=false;el.classList.remove("in");void el.offsetWidth;el.classList.add("in");
     try{if(navigator.vibrate)navigator.vibrate(120)}catch(e){}
-    if(document.hidden&&window.Notification&&Notification.permission==="granted"){try{new Notification(n.title,{body:n.text})}catch(e){}}
+    if(document.hidden&&window.Notification&&Notification.permission==="granted"){var no={body:n.text,icon:"icons/apple-touch-icon.png",tag:"mas-"+n.type};try{if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){navigator.serviceWorker.getRegistration().then(function(g){if(g)g.showNotification(n.title,no);else new Notification(n.title,no)}).catch(function(){})}else new Notification(n.title,no)}catch(e){}}
     clearTimeout(tt);tt=setTimeout(function(){el.hidden=true},APP.toastSeconds*1000);
   }
   $("toast").onclick=function(e){e.stopPropagation();this.hidden=true;$("bellBtn").click()};
@@ -827,7 +921,7 @@ $("foot").textContent = "Generated by "+REPORT.generatedBy+" · "+REPORT.generat
   function push(list){
     list=(Array.isArray(list)?list:[list]).map(norm);var fresh=0,fl=[];
     list.forEach(function(n){var i=items.findIndex(function(x){return x.id===n.id});
-      if(i<0){items.unshift(n);if(!read[n.id]){fresh++;fl.push(n)}}else items[i]=n});
+      if(i<0){if(read[n.id])return;items.unshift(n);fresh++;fl.push(n)}else items[i]=n});
     items.sort(function(a,b){return b.time-a.time});items=items.slice(0,NOTIFY.maxItems);
     cleanup();
     if(fresh){serverCount=null;ring()}
@@ -887,6 +981,17 @@ $("themeBtn").onclick=function(){
 
 /* ===== LEAVE / PERMISSION =====
    Replace LV.users / LV.reqs / save+load with your app's login + API. role "admin" sees the full queue. */
+/* ===== DEVICE TEST MODE (temporary) =====
+   on:true  -> device approval runs fully inside this browser; Supabase is NOT called for devices.
+   on:false -> uses the Supabase functions (3-device-access.sql + 4-admin-devices.sql). All Supabase code is still here.
+   approveThis:true -> whatever phone/browser opens the app counts as approved (good for first tests).
+   approved -> hardcode devices as approved: {"first 8+ characters of the device ID":"username"}, e.g. {"a1b2c3d4":"mohan"}.
+               The ID is shown on the "Waiting for admin approval" screen (set approveThis:false to see it).
+   demo:true -> adds two fake pending devices so the admin Devices screen has something to approve.
+   users -> test logins, used ONLY if no users could be loaded from Supabase. Remove later. */
+var DEVTEST={on:false,approveThis:false,approved:{},demo:false,
+  users:[]};
+if(DEVTEST.on&&!USERS.length)USERS=DEVTEST.users;
 var LV={users:USERS,reqs:LEAVE_REQUESTS.slice(),me:null,f:"Pending"};
 try{var sv=JSON.parse(localStorage.getItem("mas_leave")||"null");if(sv){LV.reqs=sv.reqs}}catch(e){}
 function lvSave(){try{localStorage.setItem("mas_leave",JSON.stringify({reqs:LV.reqs,me:LV.me}))}catch(e){}}
@@ -898,7 +1003,7 @@ function lvSync(){ /* push this user's leave notifications into the bell; admins
   if(!window.MASReport||document.body.classList.contains("locked")||!LV.me)return;
   var me=uById(LV.me),m=lvNotes().filter(function(n){return n.to===me.id});if(m.length)MASReport.push(m);
   if(me.role==="admin"){var n=LV.reqs.filter(function(r){return r.status==="Pending"}).length,id="lv-queue-"+n;
-    if(id!==LVQ){MASReport.drop("lv-queue");LVQ=id;if(n>0)MASReport.push({id:id,type:"alert",title:n+" leave request"+(n>1?"s":"")+" waiting",text:"Open the Leave tab to approve or reject"})}}}
+    if(id!==LVQ){MASReport.drop("lv-queue");LVQ=id;if(n>0)MASReport.push({id:id,type:"alert",title:n+" leave request"+(n>1?"s":"")+" waiting",text:"Tap to review in Setup > Leave"})}}}
 function uById(i){return LV.users.filter(function(u){return u.id===i})[0]}
 function dfmt(s){return new Date(s+"T00:00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"short"})}
 function lvWhen(r){var s=dfmt(r.from)+(r.to!==r.from?" – "+dfmt(r.to):"");
@@ -908,15 +1013,15 @@ function lvRender(){
   var me=uById(LV.me),adm=me.role==="admin";
   $("lvMeName").textContent=me.name;$("lvRole").textContent=adm?"Admin":"Staff";
   $("lvEmp").innerHTML=opts(LV.users);$("lvEmp").value=me.id;$("lvEmpRow").hidden=!adm;
-  var all=LV.reqs.filter(function(r){return adm||r.uid===me.id}).sort(function(a,b){return b.id-a.id});
+  var all=LV.reqs.filter(function(r){return uById(r.uid)&&(adm||r.uid===me.id)}).sort(function(a,b){return b.id-a.id});
   var n=function(s){return all.filter(function(r){return r.status===s}).length};
-  $("lvTitle").textContent=adm?"Leave queue":"My requests";
+  $("lvTitle").textContent=adm?"All requests":"My requests";
   $("lvSeg").innerHTML=["Pending","Approved","Rejected","All"].map(function(f){
     return '<button data-f="'+f+'" class="'+(LV.f===f?"on":"")+'">'+f+(f==="All"?"":" ("+n(f)+")")+'</button>'}).join("");
   var list=all.filter(function(r){return LV.f==="All"||r.status===LV.f});
   $("lvList").innerHTML=list.length?list.map(function(r){
     var u=uById(r.uid),acts="";
-    if(r.status==="Pending"&&adm)acts='<div class="lvacts"><button class="ok" data-a="ok" data-id="'+r.id+'">Approve</button><button class="no" data-a="no" data-id="'+r.id+'">Reject</button></div>'+(LV.rej===r.id?'<div class="lvrj"><input placeholder="Reason for rejecting (optional)"><button data-a="rj" data-id="'+r.id+'">Confirm</button></div>':"");
+    if(r.status==="Pending"&&adm)acts='<div class="lvacts"><button class="ok" data-a="setup" data-id="0">Review in Setup</button></div>';
     else if(r.status==="Pending"&&r.uid===me.id)acts='<div class="lvacts"><button class="del" data-a="del" data-id="'+r.id+'">Cancel request</button></div>';
     return '<div class="lvi"><div class="h"><div class="av">'+esc(u.name.charAt(0))+'</div><div class="m"><b>'+esc(u.name)+'<span class="tag">'+r.type+'</span></b><small>'+lvWhen(r)+'</small></div><span class="st st-'+r.status+'">'+r.status+'</span></div>'+
       (r.reason?'<p>'+esc(r.reason)+'</p>':"")+(r.status!=="Pending"&&r.by?'<small class="lvby">'+r.status+' by '+esc(r.by)+(r.note?' — '+esc(r.note):"")+'</small>':"")+acts+'</div>'}).join(""):'<div class="zero" style="border:0;text-align:center">No '+(LV.f==="All"?"":LV.f.toLowerCase()+" ")+'requests</div>';
@@ -926,6 +1031,7 @@ function todayStr(){var d=new Date();return new Date(d-d.getTimezoneOffset()*6e4
 $("lvType").onchange=lvType;
 $("lvSeg").onclick=function(e){var b=e.target.closest("button");if(b){LV.f=b.dataset.f;lvRender()}};
 $("lvList").onclick=function(e){var b=e.target.closest("button");if(!b)return;var id=+b.dataset.id,a=b.dataset.a,me=uById(LV.me);
+  if(a==="setup"){stOpen("leave");return}
   if(a==="no"){LV.rej=LV.rej===id?null:id;lvRender();return}
   if(a==="del")LV.reqs=LV.reqs.filter(function(r){return r.id!==id});
   else LV.reqs.forEach(function(r){if(r.id!==id)return;var ok=a==="ok";
@@ -973,21 +1079,28 @@ function setSection(s){
     $("detail").style.display="";
     $("cmpBox").style.display="";
   }
-  /* Sales: auto-select first day chip and render its detail */
-  if(s==="sales"){
-    cur=0;
-    renderDay();
-    var chips=document.querySelectorAll(".day");
-    if(chips.length){chips[0].classList.add("on");}
-  }
+  /* every tab opens on the latest day, so hero, KPIs, lists and chips always agree */
+  cur=0;pendCur=0;expCur=0;
+  ["days","pendDays","expDays"].forEach(function(id){$(id).scrollLeft=0});
+  renderDay();
+  renderExpenses(REPORT.expenses);
+  ["pendDays","expDays"].forEach(function(id){Array.prototype.forEach.call($(id).querySelectorAll(".day"),function(b,i){b.classList.toggle("on",i===0)})});
 }
 var links=document.querySelectorAll('#bottomNav a');
+/* ANIMATIONS (test): replay the entrance animations on whatever is visible. Remove this function and the ani() calls to revert. */
+function aniReplay(el,c){if(!el)return;el.classList.remove(c);void el.offsetWidth;el.classList.add(c)}
+function ani(hOnly){
+  var h=$("hero");if(h&&h.style.display!=="none")aniReplay(h,"aH");
+  if(hOnly)return;
+  SECTIONS.concat(["kpis"]).forEach(function(id){var e=$(id);if(e&&!e.hidden&&e.style.display!=="none")aniReplay(e,"aS")})}
+window.MASAni=ani;
+["days","pendDays","expDays"].forEach(function(id){$(id).addEventListener("click",function(e){if(e.target.closest(".day"))setTimeout(function(){ani(true)},0)})});
 function setView(v){view=v;
   $("reportView").hidden=v==="leave";$("leaveView").hidden=v!=="leave";
   $("hero").style.display=v==="leave"?"none":"";
   $("sub").textContent=v==="leave"?"Leave & permission":"Koovathur";
   if(v!=="leave")setSection(v);
-  links.forEach(function(a){a.classList.toggle("on",a.dataset.s===v)});}
+  links.forEach(function(a){a.classList.toggle("on",a.dataset.s===v)});ani();}
 links.forEach(function(a){a.addEventListener("click",function(e){
   e.preventDefault();
   var s=a.dataset.s;
@@ -998,9 +1111,10 @@ links.forEach(function(a){a.addEventListener("click",function(e){
 /* ===== LOGIN / LOGOUT =====
    Demo only: credentials live in LV.users in this file, so anyone can read them. Replace check() with a call to your server.
    "Remember me" keeps the session in localStorage until the user logs out; otherwise it lasts only for the browser tab (sessionStorage). */
+var START=(function(){var t=(location.hash||"").replace("#","");try{t=t||new URLSearchParams(location.search).get("tab")||""}catch(e){}return ["sales","pending","expenses","todo","leave"].indexOf(t)>=0?t:"top"})();
 var AUTH_KEY="mas_auth";
-function getAuth(){try{var v=localStorage.getItem(AUTH_KEY);return v?JSON.parse(v):null}catch(e){return null}}
-function setAuth(uid,rem){try{var j=JSON.stringify({uid:uid,at:Date.now()});localStorage.removeItem(AUTH_KEY);sessionStorage.removeItem(AUTH_KEY);localStorage.setItem(AUTH_KEY,j);
+function getAuth(){try{var v=localStorage.getItem(AUTH_KEY)||sessionStorage.getItem(AUTH_KEY);return v?JSON.parse(v):null}catch(e){return null}}
+function setAuth(uid,rem){try{var j=JSON.stringify({uid:uid,at:Date.now()});localStorage.removeItem(AUTH_KEY);sessionStorage.removeItem(AUTH_KEY);(rem?localStorage:sessionStorage).setItem(AUTH_KEY,j);
   if(rem)localStorage.setItem("mas_lastuser",uById(uid).user);else localStorage.removeItem("mas_lastuser")}catch(e){}}
 function clearAuth(){try{localStorage.removeItem(AUTH_KEY);sessionStorage.removeItem(AUTH_KEY)}catch(e){}}
 function check(u,p){return LV.users.filter(function(x){return x.user===u.trim().toLowerCase()&&x.pass===p})[0]}
@@ -1025,33 +1139,260 @@ function saleCheck(){
     {id:"tot-"+rd,type:_diff>=0?"up":"down",title:"Total "+(_diff>=0?"up ":"down ")+inr(Math.abs(_diff)),text:_prev?"vs "+short(_prev.date):""}
   ]);}
 function alertLabel(){var n=window.Notification;$("alertState").textContent=!n?"Not supported":n.permission==="granted"?"On":n.permission==="denied"?"Blocked":"Off"}
+/* ===== Web Push: save this phone's push address in Supabase so the server can notify it ===== */
+var VAPID_PUBLIC="BJ2TlSL0B_SksWbJSCmu-04WvZtQNT_RYphsLg7paPt-gKvwuVkOWG2zqcnGli7ofswOMSHcZl_doBKofU46AS0";   /* from: npx web-push generate-vapid-keys (public key only) */
+function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
+function pushSubscribe(){
+  if(!("serviceWorker" in navigator)||!window.PushManager||VAPID_PUBLIC.indexOf("PASTE")===0)return Promise.resolve(false);
+  return navigator.serviceWorker.ready.then(function(reg){
+    return reg.pushManager.getSubscription().then(function(sub){return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)})});
+  }).then(function(sub){
+    var u=uById(LV.me);
+    return fetch(SB_URL+"/rest/v1/push_subscriptions?on_conflict=endpoint",{method:"POST",
+      headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=ignore-duplicates,return=minimal"},
+      body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})});
+  }).then(function(r){return r.ok}).catch(function(){return false});
+}
+function alertOn(){alertLabel();pushSubscribe().then(function(done){MASBanner({type:"sale",title:"Alerts are on",
+  text:done?"This phone will be notified when a new day sale is saved":"Phone push is not set up yet - in-app alerts only"})})}
 $("alertBtn").onclick=function(e){e.stopPropagation();var n=window.Notification;if(!n)return;
-  if(n.permission==="default")n.requestPermission().then(function(){alertLabel();if(n.permission==="granted")MASBanner({type:"sale",title:"Alerts are on",text:"You will be notified when a new day sale arrives"})});
-  else if(n.permission==="granted")MASBanner({type:"sale",title:"Alerts are on",text:"You will be notified when a new day sale arrives"})};
+  if(n.permission==="default")n.requestPermission().then(function(){if(n.permission==="granted")alertOn();else alertLabel()});
+  else if(n.permission==="granted")alertOn();
+  else if(n.permission==="denied"){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+    alert("Alerts are blocked for this app, and the app cannot ask again.\n\nTo turn them on:\n"+(ios
+      ?"1. Open iPhone Settings and scroll down to this app (or Settings > Notifications > this app).\n2. Turn on Allow Notifications.\n3. Reopen the app, go to Setup and tap Phone alerts."
+      :"1. Long-press the app icon on your home screen and tap App info (or open Settings > Apps > this app).\n2. Tap Notifications and turn them on.\n3. If it is still blocked: open Chrome > Settings > Site settings > Notifications, find this site and set it to Allow.\n4. Reopen the app, go to Setup and tap Phone alerts.\n\nLast resort: uninstall the app, install it again and tap Phone alerts."))}};
+window.addEventListener("focus",function(){alertLabel()});
 alertLabel();
-function enter(uid){LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView("top");lvRender();lvSync();saleCheck();_scrollTop();}
-function showLogin(){LVQ="";MASReport.drop("lv-");document.body.classList.add("locked");$("loginScreen").hidden=false;$("lgPass").value="";$("lgErr").textContent="";
-  var last="";try{last=localStorage.getItem("mas_lastuser")||""}catch(e){}$("lgUser").value=last;$("lgRem").checked=true;
-  setTimeout(function(){(last?$("lgPass"):$("lgUser")).focus()},50)}
+function enter(uid){hideLoader();LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");MASReport.drop("dev-queue");DVQ="";applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView(START);START="top";lvRender();lvSync();devLoad();saleCheck();_scrollTop();if(window.Notification&&Notification.permission==="granted")pushSubscribe();if(window.LOADERR)MASBanner({type:"alert",title:"Could not load data",text:"Check your connection and reload"});}
+function showLogin(){hideLoader();LVQ="";MASReport.drop("lv-");document.body.classList.add("locked");$("loginScreen").hidden=false;$("lgPass").value="";$("lgErr").textContent="";$("lgPend").hidden=true;
+  var last="",cr=null;try{last=localStorage.getItem("mas_lastuser")||"";cr=JSON.parse(localStorage.getItem("mas_cred"))}catch(e){}
+  if(cr&&cr.u){last=cr.u;$("lgPass").value=cr.p||""}
+  $("lgUser").value=last;$("lgRem").checked=true;
+  if(!LV.users.length)$("lgErr").textContent="Could not load users ("+(window.USERERR||"unknown")+"). Reload to retry.";
+  setTimeout(function(){(last&&!$("lgPass").value?$("lgPass"):$("lgUser")).focus()},50)}
 $("lgShow").onclick=function(){var p=$("lgPass"),h=p.type==="password";p.type=h?"text":"password";this.textContent=h?"Hide":"Show"};
 /* no <form> element: embedded/sandboxed views block form submission, so sign-in is wired to the button and the Enter key */
+/* ===== Device approval: this phone/browser gets a random ID; the admin must approve it in Supabase before it can log in ===== */
+var DEV_KEY="mas_device";
+function devId(){
+  var id="";try{id=localStorage.getItem(DEV_KEY)||(document.cookie.match(/(?:^|; )mas_device=([^;]*)/)||[])[1]||""}catch(e){}
+  if(!/^[0-9a-f-]{36}$/.test(id)){
+    if(window.crypto&&crypto.randomUUID)id=crypto.randomUUID();
+    else{var b=crypto.getRandomValues(new Uint8Array(16));b[6]=b[6]&15|64;b[8]=b[8]&63|128;
+      id=Array.prototype.map.call(b,function(x,i){return([4,6,8,10].indexOf(i)>=0?"-":"")+("0"+x.toString(16)).slice(-2)}).join("")}
+  }
+  try{localStorage.setItem(DEV_KEY,id)}catch(e){}
+  try{document.cookie="mas_device="+id+";max-age=315360000;path=/;SameSite=Lax"}catch(e){}
+  return id}
+function devLabel(){var ua=navigator.userAgent||"";var m=ua.match(/\(([^)]*)\)/);return(m?m[1]:ua).slice(0,120)}
+function devRpc(fn,args){   /* resolves {ok:true,data} or {ok:false} (offline / error) */
+  if(DEVTEST.on)return Promise.resolve({ok:true,data:dtRpc(fn,args)});   /* test mode: no Supabase call */
+  var ac=window.AbortController?new AbortController():null,t=setTimeout(function(){ac&&ac.abort()},7000);
+  return fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",signal:ac?ac.signal:undefined,
+    headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify(args)})
+    .then(function(r){return r.ok?r.json().then(function(j){return{ok:true,data:j}}):{ok:false}})
+    .catch(function(){return{ok:false}}).then(function(x){clearTimeout(t);return x})}
+/* ---- test-mode stand-in for the Supabase device functions (same inputs/outputs) ---- */
+function dtDB(){var d=null;try{d=JSON.parse(localStorage.getItem("mas_devtest"))}catch(e){}
+  if(d&&d.rows){d.rows=d.rows.filter(function(r){return r.status==="pending"||r.status==="approved"});return d}
+  d={rows:[]};
+  if(DEVTEST.demo){var nm=LV.users.filter(function(u){return u.role!=="admin"}).map(function(u){return u.user});
+    d.rows=[{device_id:"11111111-0000-4000-8000-000000000001",username:nm[0]||"demo",label:"Android 14, Pixel 8 (demo)",status:"pending",created_at:new Date(Date.now()-36e5).toISOString(),last_seen:new Date().toISOString()},
+            {device_id:"22222222-0000-4000-8000-000000000002",username:nm[1]||nm[0]||"demo",label:"iPhone, iOS 17 (demo)",status:"pending",created_at:new Date(Date.now()-864e5).toISOString(),last_seen:new Date().toISOString()}]}
+  if(DEVTEST.demo){var an=LV.users.filter(function(u){return u.role==="admin"})[0],ad=an?an.user:"admin",us=LV.users.filter(function(u){return u.role!=="admin"})[0],un=us?us.user:"demo";
+    d.rows.push({device_id:"33333333-0000-4000-8000-000000000003",username:un,label:"Android 13, Galaxy A54 (demo)",status:"approved",decided_by:ad,decided_at:new Date(Date.now()-2*864e5).toISOString(),created_at:new Date(Date.now()-3*864e5).toISOString(),last_seen:new Date(Date.now()-36e5).toISOString()})}
+  return d}
+function dtSave(d){try{localStorage.setItem("mas_devtest",JSON.stringify(d))}catch(e){}}
+function dtUser(n,p){n=String(n||"").trim().toLowerCase();return LV.users.filter(function(u){return u.user===n&&String(u.pass)===String(p)})[0]}
+function dtPre(id){for(var k in DEVTEST.approved)if(id.indexOf(k)===0)return String(DEVTEST.approved[k]).toLowerCase();return ""}
+function dtRpc(fn,a){
+  var d=dtDB(),now=new Date().toISOString(),row=function(id){return d.rows.filter(function(r){return r.device_id===id})[0]};
+  if(fn==="request_device"){
+    var u=dtUser(a.p_username,a.p_pin);if(!u)return"invalid";
+    var r=row(a.p_device),ok=!!DEVTEST.approveThis||dtPre(a.p_device)===u.user;
+    if(!r){d.rows.push({device_id:a.p_device,username:u.user,label:a.p_label||"",status:ok?"approved":"pending",created_at:now,last_seen:now});dtSave(d);return ok?"approved":"pending"}
+    
+    if(r.username!==u.user){r.username=u.user;r.status=ok?"approved":"pending"}
+    else if(ok&&r.status==="pending")r.status="approved";
+    r.last_seen=now;dtSave(d);return r.status}
+  if(fn==="device_login"){
+    var r2=row(a.p_device);
+    if(r2&&r2.status==="approved"){r2.last_seen=now;dtSave(d);return r2.username}
+    return(!r2&&dtPre(a.p_device))||null}
+  var adm=dtUser(a.p_admin,a.p_pin);adm=adm&&adm.role==="admin";
+  if(fn==="admin_devices")return adm?d.rows.slice().sort(function(x,y){return y.created_at<x.created_at?-1:1}):null;
+  if(fn==="admin_set_device"){
+    if(!adm)return"denied";var r3=row(a.p_device);
+    if(a.p_action==="delete")d.rows=d.rows.filter(function(x){return x.device_id!==a.p_device});
+    else if(r3){var ns={approve:"approved"}[a.p_action];if(ns){r3.status=ns;r3.decided_by=String(a.p_admin).toLowerCase();r3.decided_at=now}}
+    dtSave(d);return"ok"}
+  return null}
+var DEVOK="mas_devok";   /* cached approval on this phone: {d:deviceId,u:username}; cleared only when site data is cleared / app uninstalled */
+function devOkUser(){try{var o=JSON.parse(localStorage.getItem(DEVOK));return o&&o.d===devId()?String(o.u).toLowerCase():""}catch(e){return ""}}
+function devOkSet(un){try{localStorage.setItem(DEVOK,JSON.stringify({d:devId(),u:String(un).toLowerCase()}))}catch(e){}}
+var LGP=null,LG_BUSY=false;
+function lgBusy(on){LG_BUSY=on;$("lgBtn").disabled=on;$("lgChk").disabled=on}
+/* Approved device = opens straight in until the user logs out. "Remember me" only saves username + password for the login screen. */
+function lgGo(u,rem){devOkSet(u.user);
+  try{localStorage.removeItem("mas_skipauto");
+    if(rem)localStorage.setItem("mas_cred",JSON.stringify({u:u.user,p:String(u.pass)}));else localStorage.removeItem("mas_cred")}catch(e){}
+  LGP=null;$("lgPend").hidden=true;setAuth(u.id,true);
+  try{if(!rem)localStorage.removeItem("mas_lastuser")}catch(e){}
+  enter(u.id)}
 function doLogin(){
+  if(LG_BUSY)return;
   var u=check($("lgUser").value,$("lgPass").value);
-  if(!u){$("lgErr").textContent="Invalid username or password.";$("lgPass").value="";return}
-  setAuth(u.id,$("lgRem").checked);enter(u.id)}
+  if(!u){$("lgErr").textContent=LV.users.length?"Invalid username or password.":"Could not load users ("+(window.USERERR||"unknown")+"). Reload to retry.";$("lgPass").value="";return}
+  var rem=$("lgRem").checked;
+  if(devOkUser()===u.user.toLowerCase()){lgGo(u,rem);return}   /* approved earlier for this user: no server check */
+  try{localStorage.removeItem(DEVOK)}catch(e){}                /* different user on this phone: needs approval again */
+  $("lgPend").hidden=true;$("lgErr").textContent="Checking this device...";lgBusy(true);
+  devRpc("request_device",{p_device:devId(),p_username:u.user,p_pin:String(u.pass),p_label:devLabel()}).then(function(r){
+    lgBusy(false);$("lgErr").textContent="";
+    var st=r.ok?String(r.data):"";
+    if(st==="approved"){lgGo(u,rem);return}
+    $("lgPass").value="";
+    if(st==="pending"){LGP={u:u,rem:rem};$("lgDev").textContent="Device ID: "+devId().slice(0,8);$("lgPend").hidden=false;return}
+    
+    if(st==="invalid"){$("lgErr").textContent="Invalid username or password.";return}
+    $("lgErr").textContent="Could not reach the server to check this device. Check your connection and try again."})}
+$("lgChk").onclick=function(){
+  if(LG_BUSY||!LGP)return;lgBusy(true);$("lgErr").textContent="";
+  devRpc("device_login",{p_device:devId()}).then(function(r){
+    lgBusy(false);
+    var un=r.ok&&r.data?String(r.data).toLowerCase():"";
+    if(un&&un===LGP.u.user.toLowerCase()){lgGo(LGP.u,LGP.rem);return}
+    $("lgErr").textContent=r.ok?"Still waiting for the admin to approve this device.":"Could not reach the server. Try again."})};
 $("lgBtn").onclick=doLogin;
 ["lgUser","lgPass"].forEach(function(id){$(id).addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();doLogin()}})});
-$("logoutBtn").onclick=function(){clearAuth();$("userPop").classList.remove("open");showLogin()};
-$("delDayBtn").onclick=function(e){if(!e||!e.stopPropagation)return;e.stopPropagation();
-  var dm=REPORT.days[cur].date.split('-'),MON={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+$("logoutBtn").onclick=function(){try{localStorage.setItem("mas_skipauto","1")}catch(e){}clearAuth();$("userPop").classList.remove("open");showLogin()};
+/* Delete day record: pick from the days that exist, then delete that one */
+var DEL_SEL=-1;
+function delRender(){
+  $("delList").innerHTML=REPORT.days.map(function(d,i){return '<button data-i="'+i+'"'+(i===DEL_SEL?' class="on"':'')+'><b>'+esc(d.date)+'</b><small>Total '+inr(d.total)+'</small></button>'}).join("");
+  $("delGo").disabled=DEL_SEL<0;$("delGo").textContent=DEL_SEL<0?"Select a day":"Delete "+REPORT.days[DEL_SEL].date}
+$("delDayBtn").onclick=function(e){if(e&&e.stopPropagation)e.stopPropagation();DEL_SEL=-1;delRender();$("delOv").hidden=false};
+$("delClose").onclick=function(){$("delOv").hidden=true};
+$("delOv").onclick=function(e){if(e.target===this)this.hidden=true};
+$("delList").onclick=function(e){var b=e.target.closest("[data-i]");if(b){DEL_SEL=+b.dataset.i;delRender()}};
+$("delGo").onclick=function(){
+  if(DEL_SEL<0)return;var day=REPORT.days[DEL_SEL];
+  var dm=day.date.split('-'),MON={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   var rawDate=dm[2]+'-'+(MON[dm[1]]||'01')+'-'+dm[0];
-  if(!confirm('Delete day sale record for '+REPORT.days[cur].date+'?\nThis cannot be undone.'))return;
-  $("userPop").classList.remove("open");
+  if(!confirm('Delete day sale record for '+day.date+'?\nThis cannot be undone.'))return;
+  $("delGo").disabled=true;
   fetch(SB_URL+'/rest/v1/day_sale_report?date=eq.'+rawDate,{method:'DELETE',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Prefer':'return=minimal'}})
-    .then(function(r){if(r.ok){MASBanner({type:'info',title:'Record deleted',text:REPORT.days[cur].date+' removed from Supabase'});setTimeout(function(){location.reload()},1500);}
-      else r.text().then(function(t){MASBanner({type:'alert',title:'Delete failed',text:t.slice(0,80)})});})
-    .catch(function(err){MASBanner({type:'alert',title:'Delete failed',text:String(err).slice(0,80)});});};
-(function(){var a=getAuth();if(!a){showLogin();return;}var u=uById(a.uid);if(u){enter(u.id);}else{/* USERS not loaded yet — show content but defer full enter() until after users load */document.body.classList.remove("locked");$("loginScreen").hidden=true;LV.me=a.uid;setView("top");_scrollTop();/* retry applyUser once users are available */var _t=setInterval(function(){var uu=uById(a.uid);if(uu){clearInterval(_t);enter(a.uid);}},100);}})();
+    .then(function(r){if(r.ok){$("delOv").hidden=true;MASBanner({type:'info',title:'Record deleted',text:day.date+' removed from Supabase'});setTimeout(function(){location.reload()},1500);}
+      else r.text().then(function(t){$("delGo").disabled=false;MASBanner({type:'alert',title:'Delete failed',text:t.slice(0,80)})});})
+    .catch(function(err){$("delGo").disabled=false;MASBanner({type:'alert',title:'Delete failed',text:String(err).slice(0,80)});});};
+/* ===== SETUP PAGE (avatar menu > Setup). Everyone: profile. Admin also: Devices (approve / reject / block + history) and Leave requests.
+   Loads on open only - no polling. ===== */
+var DEVS=[],DV={page:"profile",tab:"pending",user:"",lf:"Pending"},DVQ="",ST_IDS=["themeBtn","installBtn","alertBtn","delDayBtn"];
+function devAdmin(){var m=LV.me&&uById(LV.me);return m&&m.role==="admin"?m:null}
+function devLoad(){var m=devAdmin();if(!m)return Promise.resolve(false);
+  return devRpc("admin_devices",{p_admin:m.user,p_pin:String(m.pass)}).then(function(r){
+    if(!r.ok||!Array.isArray(r.data))return false;
+    DEVS=r.data;devNote();if(!$("dvOv").hidden)stRender();return true})}
+function devPend(){return DEVS.filter(function(d){return d.status==="pending"}).length}
+function devNote(){var n=devPend(),id="dev-queue-"+n;
+  $("devCnt").textContent=n?n+" pending":"";
+  if(id!==DVQ){MASReport.drop("dev-queue");DVQ=id;
+    if(n>0)MASReport.push({id:id,type:"alert",title:n+" device"+(n>1?"s":"")+" waiting for approval",text:"Tap to review in Setup"})}}
+function dvName(un){var u=LV.users.filter(function(x){return x.user===String(un).toLowerCase()})[0];return u?u.name:un}
+function dvWhen(t){var d=new Date(t);return isNaN(d)?"":d.toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
+function stRow(k,v){return '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)"><span style="color:var(--muted)">'+esc(k)+'</span><b style="text-align:right">'+esc(v)+'</b></div>'}
+function stProfile(){var me=uById(LV.me);if(!me)return"";
+  var dv=DEVTEST.on?"Approved (test mode)":(devOkUser()===me.user?"Approved":"Not checked");
+  return '<div class="dvrow">'+stRow("Name",me.name)+stRow("Username",me.user)+stRow("Role",me.role==="admin"?"Admin":"Staff")+stRow("App",APP.name)+'</div>'
+    +'<div class="dvrow" id="stPrefs"></div>'+'<div class="dvrow">'+stRow("This device","ID "+devId().slice(0,8))+stRow("Device access",dv)+'</div>'
+    +'<div class="dvrow"><small>More settings will be added here later.</small></div>'}
+function stDevices(){
+  var T=[["pending","Pending"],["approved","Approved"]];
+  var inU=function(d){return!DV.user||d.username===DV.user},cnt={};
+  T.forEach(function(t){cnt[t[0]]=DEVS.filter(function(d){return d.status===t[0]&&inU(d)}).length});
+  var names={};LV.users.forEach(function(u){names[u.user]=u.name});DEVS.forEach(function(d){if(!names[d.username])names[d.username]=d.username});
+  var h='<div class="dvtabs">'+T.map(function(t){return '<button data-tab="'+t[0]+'"'+(DV.tab===t[0]?' class="on"':'')+'>'+t[1]+' ('+cnt[t[0]]+')</button>'}).join("")+'</div>'
+    +'<select class="dvsel" id="dvUser" aria-label="Filter by user"><option value="">All users</option>'+Object.keys(names).sort().map(function(k){return '<option value="'+esc(k)+'"'+(DV.user===k?' selected':'')+'>'+esc(names[k])+'</option>'}).join("")+'</select>';
+  var rows=DEVS.filter(function(d){return d.status===DV.tab&&inU(d)});
+  var B=function(c,act,id,t){return '<button class="'+c+'" data-act="'+act+'" data-id="'+esc(id)+'">'+t+'</button>'};
+  return h+(rows.length?rows.map(function(d){
+    var me=d.device_id===devId(),id=d.device_id,a="";
+    if(!me){
+      if(d.status==="pending")a=B("pri","approve",id,"Approve")+B("bad","reject",id,"Reject");
+      else a=B("bad","delete",id,"Remove")}
+    var det=d.status==="pending"?'requested '+dvWhen(d.created_at):(d.decided_by?d.status.charAt(0).toUpperCase()+d.status.slice(1)+' by '+esc(dvName(d.decided_by))+' · '+dvWhen(d.decided_at):'requested '+dvWhen(d.created_at));
+    return '<div class="dvrow"><div><b>'+esc(dvName(d.username))+(me?' (this phone)':'')+'</b><br><small>'+esc(d.label||"Unknown device")+'</small><br><small>ID '+esc(String(id).slice(0,8))+' · '+det+(d.status==="approved"?' · last seen '+dvWhen(d.last_seen):'')+'</small></div>'+(a?'<div class="dvact">'+a+'</div>':'')+'</div>'}).join("")
+    :'<div class="dvrow"><small>'+(DV.tab==="pending"?"No devices waiting for approval.":"No "+DV.tab+" devices"+(DV.user?" for this user.":"."))+'</small></div>')}
+function stLeave(){
+  var all=LV.reqs.filter(function(r){return uById(r.uid)}).sort(function(a,b){return b.id-a.id});
+  var n=function(x){return all.filter(function(r){return r.status===x}).length};
+  var seg='<div class="dvtabs">'+["Pending","Approved","Rejected","All"].map(function(f){return '<button data-lf="'+f+'"'+(DV.lf===f?' class="on"':'')+'>'+f+(f==="All"?"":" ("+n(f)+")")+'</button>'}).join("")+'</div>';
+  var list=all.filter(function(r){return DV.lf==="All"||r.status===DV.lf});
+  return seg+(list.length?list.map(function(r){var u=uById(r.uid),acts="";
+    if(r.status==="Pending")acts='<div class="dvact"><button class="pri" data-la="ok" data-id="'+r.id+'">Approve</button><button class="bad" data-la="no" data-id="'+r.id+'">Reject</button></div>'+(LV.rej===r.id?'<div class="dvact"><input class="dvsel" placeholder="Reason (optional)"><button class="bad" data-la="rj" data-id="'+r.id+'">Confirm</button></div>':"");
+    return '<div class="dvrow"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(u.name)+' · '+esc(r.type)+'</b><span class="st st-'+r.status+'">'+r.status+'</span></div><small>'+esc(lvWhen(r))+(r.reason?' · '+esc(r.reason):'')+'</small>'+(r.status!=="Pending"&&r.by?'<small>'+r.status+' by '+esc(r.by)+(r.note?' — '+esc(r.note):'')+'</small>':'')+acts+'</div>'}).join("")
+    :'<div class="dvrow"><small>No '+(DV.lf==="All"?"":DV.lf.toLowerCase()+" ")+'requests.</small></div>')}
+function stStash(){var h=$("stStash");ST_IDS.forEach(function(i){var e=$(i);if(e&&h&&e.parentNode!==h)h.appendChild(e)})}
+function stRender(){
+  var adm=devAdmin();if(!adm&&DV.page!=="profile")DV.page="profile";
+  $("dvTitle").textContent="Setup"+(DEVTEST.on&&adm?" (test mode)":"");
+  var n=devPend(),lp=LV.reqs.filter(function(r){return r.status==="Pending"&&uById(r.uid)}).length,
+      P=[["profile","Profile"],["devices","Devices"+(n?" ("+n+")":"")],["leave","Leave"+(lp?" ("+lp+")":"")]];
+  $("stNav").hidden=!adm;
+  $("stNav").innerHTML=adm?P.map(function(t){return '<button data-pg="'+t[0]+'"'+(DV.page===t[0]?' class="on"':'')+'>'+t[1]+'</button>'}).join(""):"";
+  stStash();
+  $("stBody").innerHTML=DV.page==="devices"?stDevices():DV.page==="leave"?stLeave():stProfile();
+  var pf=$("stPrefs");if(pf)ST_IDS.forEach(function(i){pf.appendChild($(i))})}
+function stOpen(page,tab){alertLabel();DV.page=page||"profile";if(tab)DV.tab=tab;$("userPop").classList.remove("open");$("dvOv").hidden=false;stRender();devLoad()}
+$("setupBtn").onclick=function(){stOpen("profile")};
+$("dvClose").onclick=function(){$("dvOv").hidden=true};
+$("stNav").onclick=function(e){var b=e.target.closest("[data-pg]");if(b){DV.page=b.dataset.pg;stRender()}};
+$("stBody").onchange=function(e){if(e.target.id==="dvUser"){DV.user=e.target.value;stRender()}};
+$("stBody").onclick=function(e){
+  var t=e.target.closest("[data-tab]");if(t){DV.tab=t.dataset.tab;stRender();return}
+  var f=e.target.closest("[data-lf]");if(f){DV.lf=f.dataset.lf;stRender();return}
+  var l=e.target.closest("[data-la]");
+  if(l){var lid=+l.dataset.id,la=l.dataset.la,me=uById(LV.me);
+    if(la==="no"){LV.rej=LV.rej===lid?null:lid;stRender();return}
+    LV.reqs.forEach(function(r){if(r.id!==lid)return;var ok=la==="ok";
+      if(!ok){var inp=l.parentNode.querySelector("input");r.note=inp?inp.value.trim():""}
+      r.status=ok?"Approved":"Rejected";r.by=me.name;
+      if(r.uid!==me.id)lvNotify(r.uid,ok?"up":"down",r.type+" "+(ok?"approved":"rejected"),lvWhen(r)+" · by "+me.name+(r.note?" — "+r.note:""))});
+    LV.rej=null;lvSave();stRender();lvRender();lvSync();return}
+  var g=e.target.closest("[data-go]");if(g){$("dvOv").hidden=true;setView(g.dataset.go);return}
+  var b=e.target.closest("[data-act]"),m=devAdmin();if(!b||!m||b.disabled)return;
+  var act=b.dataset.act,id=b.dataset.id,d=DEVS.filter(function(x){return x.device_id===id})[0];
+  var W={delete:"Remove",reject:"Reject"};
+  if(W[act]&&!confirm(W[act]+" this device for "+(d?dvName(d.username):"this user")+"?"))return;
+  b.disabled=true;
+  devRpc("admin_set_device",{p_admin:m.user,p_pin:String(m.pass),p_device:id,p_action:act==="reject"?"delete":act}).then(function(r){
+    if(!r.ok||String(r.data)!=="ok"){b.disabled=false;MASBanner({type:"alert",title:"Could not update device",text:"Check your connection and try again"});return}
+    devLoad()})};
+$("ntList").addEventListener("click",function(e){
+  var n=e.target.closest(".nt[data-nid]");
+  if(n&&n.dataset.nid.indexOf("dev-queue")===0&&!e.target.closest("[data-clr]")){$("notifPop").classList.remove("open");stOpen("devices","pending")}
+  if(n&&n.dataset.nid.indexOf("lv-queue")===0&&!e.target.closest("[data-clr]")){$("notifPop").classList.remove("open");stOpen("leave")}});
+(function(){
+  document.body.classList.add("locked");
+  var ss=null;try{ss=JSON.parse(sessionStorage.getItem(AUTH_KEY))}catch(e){}
+  var su=ss&&uById(ss.uid);if(su){enter(su.id);return}              /* "don't remember me" session in this tab */
+  var skip=false;try{skip=!!localStorage.getItem("mas_skipauto")}catch(e){}
+  if(!LV.users.length||skip){clearAuth();showLogin();return}
+  var cu=devOkUser(),cd=cu&&LV.users.filter(function(x){return x.user===cu})[0];
+  if(cd){setAuth(cd.id,true);enter(cd.id);return}                 /* approved earlier on this phone: no server check */
+  devRpc("device_login",{p_device:devId()}).then(function(r){
+    var un=r.ok&&r.data,du=un&&LV.users.filter(function(x){return x.user===String(un).toLowerCase()})[0];
+    if(du){devOkSet(du.user);setAuth(du.id,true);enter(du.id);return}
+    if(!r.ok){var a=getAuth(),lu=a&&uById(a.uid);if(lu){enter(lu.id);return}}   /* offline: fall back to the saved login */
+    clearAuth();showLogin()});
+})();
+/* ===== OPENED FROM A WHATSAPP LINK =====
+   No background checking. The WhatsApp message is the alert; opening the link loads fresh data from Supabase.
+   If the app was already open in the background, reload when it comes back to the front after 10+ minutes. */
+var LOADED_AT=Date.now();
+document.addEventListener("visibilitychange",function(){
+  if(!document.hidden&&Date.now()-LOADED_AT>10*60e3&&view!=="leave")location.reload()});
 setInterval(lvSync,APP.syncSeconds*1000);
 /* ===== PWA: install button + service worker ===== */
 var deferredInstall=null;

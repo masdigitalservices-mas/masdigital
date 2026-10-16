@@ -2,7 +2,7 @@
    - App files are cached so the app opens instantly and works offline.
    - The page (index.html) is fetched from the network first, so a new upload shows up as soon as you are online.
    - Anything from another site (your cloud API) is never cached. */
-const CACHE = "mas-v1";           // change this number whenever you upload new files (v2, v3 ...)
+const CACHE = "mas-v3";           // change this number whenever you upload new files (v2, v3 ...)
 const FILES = ["./", "index.html", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png"];
 
@@ -29,4 +29,30 @@ self.addEventListener("fetch", e => {
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => {   // icons etc: cache first
     const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res;
   })));
+});
+
+/* ===== Web Push: show the notification and open the app when tapped ===== */
+self.addEventListener('push', function (event) {
+  var d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) {}
+  event.waitUntil(self.registration.showNotification(d.title || 'New day sale', {
+    body: d.body || 'Tap to open',
+    icon: 'icons/apple-touch-icon.png',
+    tag: 'mas-day-sale',          // a second push the same day replaces the first
+    renotify: true,
+    data: { url: d.url || 'index.html?tab=sales' }
+  }));
+});
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = new URL((event.notification.data && event.notification.data.url) || 'index.html?tab=sales', self.registration.scope).href;
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        if ('focus' in list[i]) { list[i].navigate(url); return list[i].focus(); }
+      }
+      return clients.openWindow(url);
+    })
+  );
 });
