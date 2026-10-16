@@ -472,7 +472,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
   <div class="dvtabs" id="stNav" hidden></div>
   <div id="stBody"></div>
 </div></div>
-<div id="stStash" hidden><button class="row2" id="themeBtn"><span>Dark / light mode</span><span>◐</span></button><button class="row2" id="installBtn" hidden><span>Install app</span><span>⬇</span></button><button class="row2" id="alertBtn"><span>Phone alerts</span><span id="alertState">Off</span></button><button class="row2 out" id="delDayBtn" hidden><span id="delDayLabel">Delete day record</span><span>🗑</span></button></div>
+<div id="stStash" hidden><button class="row2" id="themeBtn"><span>Dark / light mode</span><span>◐</span></button><button class="row2" id="installBtn"><span>Install app</span><span>⬇</span></button><button class="row2" id="alertBtn"><span>Phone alerts</span><span id="alertState">Off</span></button><button class="row2 out" id="delDayBtn" hidden><span id="delDayLabel">Delete day record</span><span>🗑</span></button></div>
 <div id="delOv" hidden><div class="dlsh">
   <div class="dvhd"><b>Delete day record</b><button id="delClose" aria-label="Close">&#10005;</button></div>
   <small style="color:var(--muted)">Pick the day you want to delete. This cannot be undone.</small>
@@ -1144,7 +1144,7 @@ var VAPID_PUBLIC="BJ2TlSL0B_SksWbJSCmu-04WvZtQNT_RYphsLg7paPt-gKvwuVkOWG2zqcnGli
 function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 function pushSubscribe(){
   if(!("serviceWorker" in navigator)||!window.PushManager||VAPID_PUBLIC.indexOf("PASTE")===0)return Promise.resolve(false);
-  window._pushPending=false;  function doSubscribe(reg){
+  function doSubscribe(reg){
     return reg.pushManager.getSubscription().then(function(sub){
       return sub?sub.unsubscribe().then(function(){return null;}):null;
     }).then(function(){
@@ -1153,16 +1153,21 @@ function pushSubscribe(){
       var u=uById(LV.me);
       return fetch(SB_URL+"/rest/v1/push_subscriptions",{method:"POST",
         headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},
-        body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){return r.ok});
+        body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){
+          if(!r.ok)return r.text().then(function(t){console.error("push_subscriptions save failed:",r.status,t);return false;});
+          return true;
+        });
     });
   }
   navigator.serviceWorker.register('sw.js');
   return navigator.serviceWorker.ready
     .then(doSubscribe)
-    .catch(function(e){return false;});
+    .catch(function(e){console.error("pushSubscribe error:",e);return false;});
 }
-function alertOn(){alertLabel();pushSubscribe().then(function(done){MASBanner({type:"sale",title:"Alerts are on",
-  text:done?"This phone will be notified when a new day sale is saved":"Phone push is not set up yet - in-app alerts only"})})}
+function alertOn(){alertLabel();pushSubscribe().then(function(done){
+  if(done)MASBanner({type:"sale",title:"✅ Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});
+  else MASBanner({type:"alert",title:"❌ Push registration failed",text:"Could not save this phone to the server. In-app alerts only. Check console for details."});
+}).catch(function(err){MASBanner({type:"alert",title:"❌ Push error",text:String(err).slice(0,120)})});}
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
   if(n.permission==="default")n.requestPermission().then(function(){if(n.permission==="granted")alertOn();else alertLabel()});
@@ -1405,9 +1410,13 @@ document.addEventListener("visibilitychange",function(){
 setInterval(lvSync,APP.syncSeconds*1000);
 /* ===== PWA: install button + service worker ===== */
 var deferredInstall=null;
-window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredInstall=e;$("installBtn").hidden=false});
-window.addEventListener("appinstalled",function(){$("installBtn").hidden=true});
-$("installBtn").onclick=function(ev){ev.stopPropagation();if(!deferredInstall)return;deferredInstall.prompt();deferredInstall.userChoice.then(function(){deferredInstall=null;$("installBtn").hidden=true})};
+var _inStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
+if(_inStandalone)$("installBtn").hidden=true;
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredInstall=e;if(!_inStandalone)$("installBtn").hidden=false});
+window.addEventListener("appinstalled",function(){deferredInstall=null;$("installBtn").hidden=true});
+$("installBtn").onclick=function(ev){ev.stopPropagation();
+  if(!deferredInstall){MASBanner({type:"info",title:"Install",text:"Use your browser menu → 'Add to Home Screen' to install"});return}
+  deferredInstall.prompt();deferredInstall.userChoice.then(function(){deferredInstall=null;$("installBtn").hidden=true})};
 if("serviceWorker" in navigator&&/^https?:/.test(location.protocol))window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js")});window.addEventListener("storage",lvSync);
 } // end renderPage
 </script>
