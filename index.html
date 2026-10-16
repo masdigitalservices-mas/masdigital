@@ -1144,6 +1144,8 @@ var VAPID_PUBLIC="BJ2TlSL0B_SksWbJSCmu-04WvZtQNT_RYphsLg7paPt-gKvwuVkOWG2zqcnGli
 function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 function pushSubscribe(){
   if(!("serviceWorker" in navigator)||!window.PushManager||VAPID_PUBLIC.indexOf("PASTE")===0)return Promise.resolve(false);
+  if(window._pushPending)return Promise.resolve(false);
+  window._pushPending=true;
   function doSubscribe(reg){
     return reg.pushManager.getSubscription().then(function(sub){
       return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)});
@@ -1164,7 +1166,7 @@ function pushSubscribe(){
       });
     }
     return reg;
-  }).then(doSubscribe).catch(function(e){alert('push error: '+e);return false});
+  }).then(doSubscribe).catch(function(e){alert('push error: '+e);return false}).then(function(r){window._pushPending=false;return r;});
 }
 function alertOn(){alertLabel();pushSubscribe().then(function(done){MASBanner({type:"sale",title:"Alerts are on",
   text:done?"This phone will be notified when a new day sale is saved":"Phone push is not set up yet - in-app alerts only"})})}
@@ -1177,7 +1179,7 @@ $("alertBtn").onclick=function(e){e.stopPropagation();var n=window.Notification;
       :"1. Long-press the app icon on your home screen and tap App info (or open Settings > Apps > this app).\n2. Tap Notifications and turn them on.\n3. If it is still blocked: open Chrome > Settings > Site settings > Notifications, find this site and set it to Allow.\n4. Reopen the app, go to Setup and tap Phone alerts.\n\nLast resort: uninstall the app, install it again and tap Phone alerts."))}};
 window.addEventListener("focus",function(){alertLabel()});
 alertLabel();
-function enter(uid){hideLoader();LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");MASReport.drop("dev-queue");DVQ="";applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView(START);START="top";lvRender();lvSync();devLoad();saleCheck();_scrollTop();if(window.Notification&&Notification.permission==="granted")pushSubscribe();if(window.LOADERR)MASBanner({type:"alert",title:"Could not load data",text:"Check your connection and reload"});}
+function enter(uid){hideLoader();LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");MASReport.drop("dev-queue");DVQ="";applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView(START);START="top";lvRender();lvSync();devLoad();saleCheck();_scrollTop();if(window.LOADERR)MASBanner({type:"alert",title:"Could not load data",text:"Check your connection and reload"});}
 function showLogin(){hideLoader();LVQ="";MASReport.drop("lv-");document.body.classList.add("locked");$("loginScreen").hidden=false;$("lgPass").value="";$("lgErr").textContent="";$("lgPend").hidden=true;
   var last="",cr=null;try{last=localStorage.getItem("mas_lastuser")||"";cr=JSON.parse(localStorage.getItem("mas_cred"))}catch(e){}
   if(cr&&cr.u){last=cr.u;$("lgPass").value=cr.p||""}
