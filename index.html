@@ -1146,24 +1146,28 @@ function pushSubscribe(){
   if(!("serviceWorker" in navigator)){alert('debug: no serviceWorker');return Promise.resolve(false);}
   if(!window.PushManager){alert('debug: no PushManager');return Promise.resolve(false);}
   if(VAPID_PUBLIC.indexOf("PASTE")===0){alert('debug: VAPID not set');return Promise.resolve(false);}
-  return navigator.serviceWorker.register('sw.js').then(function(reg){
-    if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}
-    if(reg.installing){reg.installing.postMessage({type:'SKIP_WAITING'});}
-    var active=reg.active||navigator.serviceWorker.controller;
-    if(active){alert('debug: using active SW');return reg;}
-    return new Promise(function(resolve){
-      var t=setTimeout(function(){alert('debug: SW timeout, using reg anyway');resolve(reg);},3000);
-      navigator.serviceWorker.addEventListener('controllerchange',function(){
-        clearTimeout(t);alert('debug: controllerchange fired');resolve(reg);
-      });
-    });
-  }).then(function(reg){alert('debug: SW ready, active='+!!reg.active);
+  var doSubscribe=function(reg){
     return reg.pushManager.getSubscription().then(function(sub){
       alert('debug: existing sub='+(sub?'yes':'no'));
       return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)});
     });
-  }).then(function(sub){
-    if(!sub){alert('debug: sub is null/false, aborting');return false;}
+  };
+  if(navigator.serviceWorker.controller){
+    alert('debug: SW already controlling, subscribing...');
+    return navigator.serviceWorker.register('sw.js').then(doSubscribe);
+  }
+  alert('debug: SW not controlling, registering and waiting...');
+  return navigator.serviceWorker.register('sw.js').then(function(reg){
+    if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}
+    if(reg.installing){reg.installing.postMessage({type:'SKIP_WAITING'});}
+    return new Promise(function(resolve){
+      var t=setTimeout(function(){resolve(reg);},4000);
+      navigator.serviceWorker.addEventListener('controllerchange',function(){clearTimeout(t);resolve(reg);});
+    });
+  }).then(function(reg){
+    alert('debug: now controlled='+!!navigator.serviceWorker.controller+', subscribing...');
+    return doSubscribe(reg);
+  });
     alert('debug: got sub, saving to DB...');
     var u=uById(LV.me);
     return fetch(SB_URL+"/rest/v1/push_subscriptions?on_conflict=endpoint",{method:"POST",
