@@ -1149,7 +1149,14 @@ function pushSubscribe(){
   return navigator.serviceWorker.register('sw.js').then(function(reg){
     if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}
     if(reg.installing){reg.installing.postMessage({type:'SKIP_WAITING'});}
-    return navigator.serviceWorker.ready;
+    var active=reg.active||navigator.serviceWorker.controller;
+    if(active){alert('debug: using active SW');return reg;}
+    return new Promise(function(resolve){
+      var t=setTimeout(function(){alert('debug: SW timeout, using reg anyway');resolve(reg);},3000);
+      navigator.serviceWorker.addEventListener('controllerchange',function(){
+        clearTimeout(t);alert('debug: controllerchange fired');resolve(reg);
+      });
+    });
   }).then(function(reg){alert('debug: SW ready, active='+!!reg.active);
     return reg.pushManager.getSubscription().then(function(sub){
       alert('debug: existing sub='+(sub?'yes':'no'));
