@@ -1148,7 +1148,9 @@ function pushSubscribe(){
   window._pushPending=true;
   function doSubscribe(reg){
     return reg.pushManager.getSubscription().then(function(sub){
-      return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)});
+      return sub?sub.unsubscribe().then(function(){return null;}):null;
+    }).then(function(){
+      return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)});
     }).then(function(sub){
       var u=uById(LV.me);
       return fetch(SB_URL+"/rest/v1/push_subscriptions?on_conflict=endpoint",{method:"POST",
