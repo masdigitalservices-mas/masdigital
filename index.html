@@ -1146,10 +1146,9 @@ function pushSubscribe(){
   if(!("serviceWorker" in navigator)){alert('debug: no serviceWorker');return Promise.resolve(false);}
   if(!window.PushManager){alert('debug: no PushManager');return Promise.resolve(false);}
   if(VAPID_PUBLIC.indexOf("PASTE")===0){alert('debug: VAPID not set');return Promise.resolve(false);}
-  return navigator.serviceWorker.getRegistration().then(function(reg){
-    if(!reg){alert('debug: no SW registration found');return Promise.resolve(false);}
-    alert('debug: got SW reg, getting subscription...');
-    alert('debug: SW ready, getting subscription...');
+  return navigator.serviceWorker.register('sw.js').then(function(){
+    return navigator.serviceWorker.ready;
+  }).then(function(reg){alert('debug: SW ready, active='+!!reg.active);
     return reg.pushManager.getSubscription().then(function(sub){
       alert('debug: existing sub='+(sub?'yes':'no'));
       return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)});
