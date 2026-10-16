@@ -1144,8 +1144,7 @@ var VAPID_PUBLIC="BJ2TlSL0B_SksWbJSCmu-04WvZtQNT_RYphsLg7paPt-gKvwuVkOWG2zqcnGli
 function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 function pushSubscribe(){
   if(!("serviceWorker" in navigator)||!window.PushManager||VAPID_PUBLIC.indexOf("PASTE")===0)return Promise.resolve(false);
-  if(window._pushPending)return Promise.resolve(false);
-  window._pushPending=true;
+  window._pushPending=false;
   function doSubscribe(reg){
     return reg.pushManager.getSubscription().then(function(sub){
       return sub?sub.unsubscribe().then(function(){return null;}):null;
@@ -1160,9 +1159,8 @@ function pushSubscribe(){
   }
   navigator.serviceWorker.register('sw.js');
   return navigator.serviceWorker.ready
-    .then(doSubscribe)
-    .catch(function(e){alert('push error: '+e);return false})
-    .then(function(r){window._pushPending=false;return r;});
+    .then(function(reg){alert('SW ready, subscribing...');return doSubscribe(reg);})
+    .catch(function(e){alert('push error: '+e);return false;});
 }
 function alertOn(){alertLabel();pushSubscribe().then(function(done){MASBanner({type:"sale",title:"Alerts are on",
   text:done?"This phone will be notified when a new day sale is saved":"Phone push is not set up yet - in-app alerts only"})})}
