@@ -317,7 +317,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 .lvrj button{flex:none;border:0;border-radius:10px;padding:0 14px;font:inherit;font-weight:700;background:#dc2626;color:#fff}
 .lvby{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
 /* heads-up alert */
-.toast{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:90;width:calc(100% - 20px);max-width:440px;display:flex;align-items:center;gap:11px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:11px 13px;box-shadow:0 12px 34px #0006;cursor:pointer}
+.toast{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:600;width:calc(100% - 20px);max-width:440px;display:flex;align-items:center;gap:11px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:11px 13px;box-shadow:0 12px 34px #0006;cursor:pointer}
 .toast.in{animation:tin .45s cubic-bezier(.2,1.1,.3,1) forwards}
 @keyframes tin{to{transform:translate(-50%,0)}}
 .toast .d{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;flex:none}
@@ -1179,7 +1179,7 @@ pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
   else MASBanner({type:"alert",title:"Push registration failed",text:"Could not save this phone to the server. In-app alerts only. Check console for details."});
 }).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
-document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
+document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n){var _ios=/iPhone|iPad|iPod/.test(navigator.userAgent);MASBanner({type:"alert",title:"Push not available",text:_ios?"On iPhone: Share > Add to Home Screen, open the app from the icon, then tap Phone alerts.":"This browser does not support push alerts."});return}MASBanner({type:"info",title:"Phone alerts",text:"Permission: "+n.permission});
   if(n.permission==="default")n.requestPermission().then(function(){if(n.permission==="granted")alertOn();else alertLabel()});
   else if(n.permission==="granted"){MASBanner({type:"info",title:"Registering…",text:"Saving this phone for push alerts"});alertOn();}
   else if(n.permission==="denied"){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
