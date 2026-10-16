@@ -1160,7 +1160,8 @@ function pushSubscribe(){
     });
   }
   navigator.serviceWorker.register('sw.js');
-  return navigator.serviceWorker.ready
+  var swReady=new Promise(function(res,rej){var t=setTimeout(function(){rej(new Error('SW ready timeout'))},8000);navigator.serviceWorker.ready.then(function(r){clearTimeout(t);res(r)},rej)});
+  return swReady
     .then(doSubscribe)
     .catch(function(e){console.error("pushSubscribe error:",e);return false;});
 }
@@ -1171,7 +1172,7 @@ function alertOn(){alertLabel();pushSubscribe().then(function(done){
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
   if(n.permission==="default")n.requestPermission().then(function(){if(n.permission==="granted")alertOn();else alertLabel()});
-  else if(n.permission==="granted")alertOn();
+  else if(n.permission==="granted"){MASBanner({type:"info",title:"Registering…",text:"Saving this phone for push alerts"});alertOn();}
   else if(n.permission==="denied"){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
     alert("Alerts are blocked for this app, and the app cannot ask again.\n\nTo turn them on:\n"+(ios
       ?"1. Open iPhone Settings and scroll down to this app (or Settings > Notifications > this app).\n2. Turn on Allow Notifications.\n3. Reopen the app, go to Setup and tap Phone alerts."
