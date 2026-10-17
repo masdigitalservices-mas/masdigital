@@ -317,7 +317,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 .lvrj button{flex:none;border:0;border-radius:10px;padding:0 14px;font:inherit;font-weight:700;background:#dc2626;color:#fff}
 .lvby{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
 /* heads-up alert */
-.toast{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:600;width:calc(100% - 20px);max-width:440px;display:flex;align-items:center;gap:11px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:11px 13px;box-shadow:0 12px 34px #0006;cursor:pointer}
+.toast{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:90;width:calc(100% - 20px);max-width:440px;display:flex;align-items:center;gap:11px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:11px 13px;box-shadow:0 12px 34px #0006;cursor:pointer}
 .toast.in{animation:tin .45s cubic-bezier(.2,1.1,.3,1) forwards}
 @keyframes tin{to{transform:translate(-50%,0)}}
 .toast .d{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;flex:none}
@@ -1142,9 +1142,11 @@ function pushOk(){try{return localStorage.getItem("mas_push_ok")==="1"}catch(e){
 function pushSet(v){try{if(v)localStorage.setItem("mas_push_ok","1");else localStorage.removeItem("mas_push_ok")}catch(e){}}
 function alertLabel(){var n=window.Notification;$("alertState").textContent=!n?"Not supported":n.permission==="denied"?"Blocked":n.permission==="granted"?(pushOk()?"On":"Tap to finish"):"Off"}
 /* ===== Web Push: save this phone's push address in Supabase so the server can notify it ===== */
-var VAPID_PUBLIC="BK2sYm70TFhaeAsBKcKrFGUbBw48ZDe9FcjSxiC5uZIKVUe4JesVSMq1a8UmlYsJjIlyd7G5cC8YjAoK59Ib_8A";   /* from: npx web-push generate-vapid-keys (public key only) */
+var VAPID_PUBLIC="BJ2TlSL0B_SksWbJSCmu-04WvZtQNT_RYphsLg7paPt-gKvwuVkOWG2zqcnGli7ofswOMSHcZl_doBKofU46AS0";   /* from: npx web-push generate-vapid-keys (public key only) */
 function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
+var pushErr="";
 function pushSubscribe(){
+  pushErr="";
   if(!("serviceWorker" in navigator)||!window.PushManager||VAPID_PUBLIC.indexOf("PASTE")===0)return Promise.resolve(false);
   function doSubscribe(reg){
     var key=vapidBytes(VAPID_PUBLIC);
@@ -1160,7 +1162,7 @@ function pushSubscribe(){
       return fetch(SB_URL+"/rest/v1/push_subscriptions",{method:"POST",
         headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=ignore-duplicates,return=minimal"},
         body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){
-          if(!r.ok)return r.text().then(function(t){console.error("push_subscriptions save failed:",r.status,t);return false;});
+          if(!r.ok)return r.text().then(function(t){console.error("push_subscriptions save failed:",r.status,t);pushErr="Server saved no data (HTTP "+r.status+"): "+String(t).slice(0,100);return false;});
           return true;
         });
     });
@@ -1169,17 +1171,17 @@ function pushSubscribe(){
   var swReady=new Promise(function(res,rej){var t=setTimeout(function(){rej(new Error('SW ready timeout'))},8000);navigator.serviceWorker.ready.then(function(r){clearTimeout(t);res(r)},rej)});
   return swReady
     .then(doSubscribe)
-    .catch(function(e){console.error("pushSubscribe error:",e);return false;});
+    .catch(function(e){console.error("pushSubscribe error:",e);pushErr=((e&&e.name)?e.name+": ":"")+String((e&&e.message)||e).slice(0,120);return false;});
 }
 function alertOn(){alertLabel();
   if(!("serviceWorker" in navigator)||!window.PushManager){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
     MASBanner({type:"alert",title:"Push not available",text:ios?"On iPhone, add this app to the Home Screen and open it from there, then tap Phone alerts again.":"This browser does not support push alerts."});return}
 pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
   if(done)MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});
-  else MASBanner({type:"alert",title:"Push registration failed",text:"Could not save this phone to the server. In-app alerts only. Check console for details."});
+  else MASBanner({type:"alert",title:"Push registration failed",text:"Reason: "+(pushErr||"unknown")+" (In-app alerts still work.)"});
 }).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
-document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n){var _ios=/iPhone|iPad|iPod/.test(navigator.userAgent);MASBanner({type:"alert",title:"Push not available",text:_ios?"On iPhone: Share > Add to Home Screen, open the app from the icon, then tap Phone alerts.":"This browser does not support push alerts."});return}MASBanner({type:"info",title:"Phone alerts",text:"Permission: "+n.permission});
+document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
   if(n.permission==="default")n.requestPermission().then(function(){if(n.permission==="granted")alertOn();else alertLabel()});
   else if(n.permission==="granted"){MASBanner({type:"info",title:"Registering…",text:"Saving this phone for push alerts"});alertOn();}
   else if(n.permission==="denied"){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
