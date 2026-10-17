@@ -1167,8 +1167,13 @@ function pushSubscribe(){
         });
     });
   }
-  navigator.serviceWorker.register('sw.js');
-  var swReady=new Promise(function(res,rej){var t=setTimeout(function(){rej(new Error('SW ready timeout'))},8000);navigator.serviceWorker.ready.then(function(r){clearTimeout(t);res(r)},rej)});
+  var regErr="";
+  navigator.serviceWorker.register('sw.js').catch(function(e){regErr="register failed: "+((e&&e.message)||e)});
+  var swReady=new Promise(function(res,rej){var t=setTimeout(function(){
+    navigator.serviceWorker.getRegistration().then(function(r){
+      rej(new Error("SW ready timeout. "+(regErr||(r?("SW state: installing="+!!r.installing+", waiting="+!!r.waiting+", active="+!!r.active):"no SW registered"))+" | "+location.protocol+"//"+location.host));
+    },function(){rej(new Error("SW ready timeout"))});
+  },15000);navigator.serviceWorker.ready.then(function(r){clearTimeout(t);res(r)},rej)});
   return swReady
     .then(doSubscribe)
     .catch(function(e){console.error("pushSubscribe error:",e);pushErr=((e&&e.name)?e.name+": ":"")+String((e&&e.message)||e).slice(0,400);return false;});
@@ -1178,7 +1183,7 @@ function alertOn(){alertLabel();
     MASBanner({type:"alert",title:"Push not available",text:ios?"On iPhone, add this app to the Home Screen and open it from there, then tap Phone alerts again.":"This browser does not support push alerts."});return}
 pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
   if(done)MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});
-  else{MASBanner({type:"alert",title:"Push failed [build 4]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 4]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
+  else{MASBanner({type:"alert",title:"Push failed [build 5]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 5]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
 }).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
