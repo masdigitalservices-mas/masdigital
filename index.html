@@ -1162,7 +1162,7 @@ function pushSubscribe(){
       return fetch(SB_URL+"/rest/v1/push_subscriptions",{method:"POST",
         headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=ignore-duplicates,return=minimal"},
         body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){
-          if(!r.ok)return r.text().then(function(t){console.error("push_subscriptions save failed:",r.status,t);pushErr="Server saved no data (HTTP "+r.status+"): "+String(t).slice(0,100);return false;});
+          if(!r.ok)return r.text().then(function(t){console.error("push_subscriptions save failed:",r.status,t);pushErr="Server saved no data (HTTP "+r.status+"): "+String(t).slice(0,400);return false;});
           return true;
         });
     });
@@ -1171,14 +1171,14 @@ function pushSubscribe(){
   var swReady=new Promise(function(res,rej){var t=setTimeout(function(){rej(new Error('SW ready timeout'))},8000);navigator.serviceWorker.ready.then(function(r){clearTimeout(t);res(r)},rej)});
   return swReady
     .then(doSubscribe)
-    .catch(function(e){console.error("pushSubscribe error:",e);pushErr=((e&&e.name)?e.name+": ":"")+String((e&&e.message)||e).slice(0,120);return false;});
+    .catch(function(e){console.error("pushSubscribe error:",e);pushErr=((e&&e.name)?e.name+": ":"")+String((e&&e.message)||e).slice(0,400);return false;});
 }
 function alertOn(){alertLabel();
   if(!("serviceWorker" in navigator)||!window.PushManager){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
     MASBanner({type:"alert",title:"Push not available",text:ios?"On iPhone, add this app to the Home Screen and open it from there, then tap Phone alerts again.":"This browser does not support push alerts."});return}
 pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
   if(done)MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});
-  else MASBanner({type:"alert",title:"Push registration failed",text:"Reason: "+(pushErr||"unknown")+" (In-app alerts still work.)"});
+  else{MASBanner({type:"alert",title:"Push failed [build 4]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 4]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
 }).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;

@@ -2,7 +2,7 @@
    - App files are cached so the app opens instantly and works offline.
    - The page (index.html) is fetched from the network first, so a new upload shows up as soon as you are online.
    - Anything from another site (your cloud API) is never cached. */
-const CACHE = "mas-v5";           // change this number whenever you upload new files (v2, v3 ...)
+const CACHE = "mas-v6";           // change this number whenever you upload new files (v2, v3 ...)
 const FILES = ["./", "index.html", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png"];
 
