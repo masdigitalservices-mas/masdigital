@@ -1182,8 +1182,8 @@ function alertOn(){alertLabel();
   if(!("serviceWorker" in navigator)||!window.PushManager){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
     MASBanner({type:"alert",title:"Push not available",text:ios?"On iPhone, add this app to the Home Screen and open it from there, then tap Phone alerts again.":"This browser does not support push alerts."});return}
 pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
-  if(done)MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});
-  else{MASBanner({type:"alert",title:"Push failed [build 6]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 6]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
+  if(done){MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});try{alert("Push alerts saved [build 7]\n\nThis phone is registered for day sale alerts.")}catch(e){}}
+  else{MASBanner({type:"alert",title:"Push failed [build 7]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 7]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
 }).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
