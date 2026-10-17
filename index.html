@@ -272,8 +272,8 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
 #appLoader{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .25s}
 #appLoader.done{opacity:0;pointer-events:none}
 #appLoader .lring{position:relative;width:104px;height:104px;display:flex;align-items:center;justify-content:center}
-#appLoader .lring img{width:76px;height:76px;border-radius:50%;object-fit:cover;animation:lspin 2.6s linear infinite}
-#appLoader .spin{position:absolute;inset:0;border-radius:50%;border:4px solid var(--line);border-top-color:var(--brand);animation:lspin 1s linear infinite reverse}
+#appLoader .lring img{width:76px;height:76px;border-radius:50%;object-fit:cover;animation:lspin 2.6s linear infinite reverse}
+#appLoader .spin{position:absolute;inset:0;border-radius:50%;border:4px solid var(--line);border-top-color:var(--brand);animation:lspin 1s linear infinite}
 #appLoader small{color:var(--muted);font-size:12.5px}
 @keyframes lspin{to{transform:rotate(360deg)}}
 /* ===== ANIMATIONS (test) - delete everything from here to "END ANIMATIONS" (and the ani() lines in the script) to revert ===== */
@@ -374,7 +374,7 @@ body.locked #app,body.locked #bottomNav,body.locked .pop{display:none!important}
   <label id="lgPassRow" class="lgpw">Password<input type="password" id="lgPass" autocomplete="current-password"><button type="button" id="lgShow">Show</button></label>
   <label class="lgrem" id="lgRemRow"><input type="checkbox" id="lgRem" checked>Remember me on this device</label>
   <div class="lgerr" id="lgErr"></div>
-  <div class="lgpend" id="lgPend" hidden><b>Waiting for admin approval</b><span>This device is new. Ask the admin to approve it, then tap Check again.</span><code id="lgDev"></code><button class="btn" id="lgChk" type="button">Check again</button></div>
+  <div class="lgpend" id="lgPend" hidden><b>Waiting for admin approval</b><span>This device is new. Ask the admin to approve it, then tap Check again.</span><code id="lgDev"></code><button class="btn" id="lgChk" type="button">Check again</button><button class="btn" id="lgNotify" type="button">Notify me when approved</button></div>
   <button class="btn" id="lgBtn" type="button">Sign in</button>
   <p class="lghint" id="lgHint"></p>
  </div>
@@ -992,9 +992,30 @@ $("themeBtn").onclick=function(){
 var DEVTEST={on:false,approveThis:false,approved:{},demo:false,
   users:[]};
 if(DEVTEST.on&&!USERS.length)USERS=DEVTEST.users;
-var LV={users:USERS,reqs:LEAVE_REQUESTS.slice(),me:null,f:"Pending"};
-try{var sv=JSON.parse(localStorage.getItem("mas_leave")||"null");if(sv){LV.reqs=sv.reqs}}catch(e){}
-function lvSave(){try{localStorage.setItem("mas_leave",JSON.stringify({reqs:LV.reqs,me:LV.me}))}catch(e){}}
+var LV={users:USERS,reqs:[],me:null,f:"Pending"};
+function lvSave(){}   /* leave is stored in Supabase (table leave_requests); nothing is kept on this phone */
+var LV_BUSY=false,LV_AGAIN=false;
+function lvUserByName(un){un=String(un||"").toLowerCase();return LV.users.filter(function(u){return u.user===un})[0]}
+function lvMap(r){var u=lvUserByName(r.username);if(!u)return null;var b=lvUserByName(r.by);
+  return{id:r.id,uid:u.id,type:r.type,from:r.from,to:r.to,t1:r.t1,t2:r.t2,sess:r.sess,reason:r.reason||"",status:r.status,by:b?b.name:(r.by||""),byu:String(r.by||"").toLowerCase(),note:r.note||""}}
+/* in-app bell notice when one of MY requests was approved/rejected since last time (first run only records the baseline) */
+function lvSeen(me){var key="mas_lvseen_"+me.user,seen=null;try{seen=JSON.parse(localStorage.getItem(key)||"null")}catch(e){}
+  var now={};LV.reqs.forEach(function(r){if(r.uid===me.id)now[r.id]=r.status});
+  if(seen){LV.reqs.forEach(function(r){if(r.uid!==me.id||r.status==="Pending"||seen[r.id]===r.status||r.byu===me.user)return;
+    var ok=r.status==="Approved";lvNotify(me.id,ok?"up":"down",r.type+" "+(ok?"approved":"rejected"),lvWhen(r)+(r.by?" \u00b7 by "+r.by:"")+(r.note?" \u2014 "+r.note:""))})}
+  try{localStorage.setItem(key,JSON.stringify(now))}catch(e){}}
+function lvLoad(quiet){var me=LV.me&&uById(LV.me);if(!me)return Promise.resolve(false);
+  if(LV_BUSY){LV_AGAIN=true;return Promise.resolve(false)}
+  LV_BUSY=true;
+  return devRpc("leave_list",{p_user:me.user,p_pin:String(me.pass)}).then(function(x){
+    if(!x.ok||!Array.isArray(x.data)){if(!quiet)MASBanner({type:"alert",title:"Could not load leave requests",text:"Check your connection and try again"});return false}
+    LV.reqs=x.data.map(lvMap).filter(Boolean);
+    lvSeen(me);lvRender();lvSync();if(!$("dvOv").hidden)stRender();return true})
+  .then(function(r){LV_BUSY=false;if(LV_AGAIN){LV_AGAIN=false;lvLoad(true)}return r},function(){LV_BUSY=false;return false})}
+function lvDecide(id,act,note,btn){var me=uById(LV.me);if(!me)return;if(btn)btn.disabled=true;
+  devRpc("leave_decide",{p_user:me.user,p_pin:String(me.pass),p_id:id,p_action:act,p_note:note||""}).then(function(x){
+    if(!x.ok||String(x.data)!=="ok"){if(btn)btn.disabled=false;MASBanner({type:"alert",title:"Could not update request",text:"Check your connection and try again"});return}
+    LV.rej=null;lvLoad(true)})}
 function lvNotes(){try{return JSON.parse(localStorage.getItem("mas_lvnotes")||"[]")}catch(e){return[]}}
 function lvNotify(to,type,title,text){var a=lvNotes();a.push({id:"lv-"+Date.now()+"-"+to+"-"+a.length,to:to,type:type,title:title,text:text,time:new Date().toISOString()});
   try{localStorage.setItem("mas_lvnotes",JSON.stringify(a.slice(-100)))}catch(e){}}
@@ -1030,15 +1051,11 @@ function lvType(){var t=$("lvType").value;$("lvToRow").hidden=t!=="Leave";$("lvT
 function todayStr(){var d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
 $("lvType").onchange=lvType;
 $("lvSeg").onclick=function(e){var b=e.target.closest("button");if(b){LV.f=b.dataset.f;lvRender()}};
-$("lvList").onclick=function(e){var b=e.target.closest("button");if(!b)return;var id=+b.dataset.id,a=b.dataset.a,me=uById(LV.me);
+$("lvList").onclick=function(e){var b=e.target.closest("button");if(!b)return;var id=+b.dataset.id,a=b.dataset.a;
   if(a==="setup"){stOpen("leave");return}
   if(a==="no"){LV.rej=LV.rej===id?null:id;lvRender();return}
-  if(a==="del")LV.reqs=LV.reqs.filter(function(r){return r.id!==id});
-  else LV.reqs.forEach(function(r){if(r.id!==id)return;var ok=a==="ok";
-    if(!ok){var inp=b.parentNode.querySelector("input");r.note=inp?inp.value.trim():""}
-    r.status=ok?"Approved":"Rejected";r.by=me.name;
-    if(r.uid!==me.id)lvNotify(r.uid,ok?"up":"down",r.type+" "+(ok?"approved":"rejected"),lvWhen(r)+" · by "+me.name+(r.note?" — "+r.note:""))});
-  LV.rej=null;lvSave();lvRender();lvSync()};
+  if(a==="del"){lvDecide(id,"del","",b);return}
+  var inp=b.parentNode.querySelector("input");lvDecide(id,a==="ok"?"ok":"no",inp?inp.value.trim():"",b)};
 $("lvSubmit").onclick=function(){
   var me=uById(LV.me),t=$("lvType").value,f=$("lvFrom").value,to=t==="Leave"?($("lvTo").value||f):f,err="";
   if(!f)err="Please choose a date.";
@@ -1046,13 +1063,13 @@ $("lvSubmit").onclick=function(){
   else if(t==="Permission"&&$("lvT2").value<=$("lvT1").value)err="End time must be after start time.";
   else if(!$("lvReason").value.trim())err="Please add a reason.";
   $("lvErr").textContent=err;if(err)return;
-  var r={id:Date.now(),uid:me.role==="admin"?+$("lvEmp").value:me.id,type:t,from:f,to:to,reason:$("lvReason").value.trim(),status:"Pending"};
-  if(t==="Permission"){r.t1=$("lvT1").value;r.t2=$("lvT2").value}
-  if(t==="Half day")r.sess=$("lvSess").value;
-  LV.reqs.push(r);
-  LV.users.forEach(function(u){if(u.role==="admin"&&u.id!==me.id)lvNotify(u.id,"alert","New "+t.toLowerCase()+" request",uById(r.uid).name+" · "+lvWhen(r))});
-  if(r.uid!==me.id)lvNotify(r.uid,"info",t+" applied for you",lvWhen(r)+" · by "+me.name);
-  lvSave();$("lvReason").value="";$("lvBox").open=false;LV.f="Pending";lvRender();lvSync()};
+  var who=me.role==="admin"?uById(+$("lvEmp").value):me,btn=this;btn.disabled=true;
+  devRpc("leave_apply",{p_user:me.user,p_pin:String(me.pass),p_for:who?who.user:me.user,p_type:t,p_from:f,p_to:to,
+    p_t1:t==="Permission"?$("lvT1").value:null,p_t2:t==="Permission"?$("lvT2").value:null,p_sess:t==="Half day"?$("lvSess").value:null,
+    p_reason:$("lvReason").value.trim()}).then(function(x){
+    btn.disabled=false;
+    if(!x.ok||!x.data){$("lvErr").textContent="Could not send the request. Check your connection and try again.";return}
+    $("lvReason").value="";$("lvBox").open=false;LV.f="Pending";lvLoad(true)})};
 $("lvFrom").value=$("lvTo").value=todayStr();lvType();
 
 /* bottom nav */
@@ -1104,7 +1121,7 @@ function setView(v){view=v;
 links.forEach(function(a){a.addEventListener("click",function(e){
   e.preventDefault();
   var s=a.dataset.s;
-  if(s==="leave"){setView("leave");lvRender();}
+  if(s==="leave"){setView("leave");lvRender();lvLoad(true);}
   else{setView(s);}
   _scrollTop();});});
 
@@ -1145,7 +1162,7 @@ function alertLabel(){var n=window.Notification;$("alertState").textContent=!n?"
 var VAPID_PUBLIC="BK2wlPzb3lkZt0Mf0Dar8xzM8Tp-dWOTZe2ihxBX1o_iuvUr5w8dBzOcVtgK268qYU-L-i8hAQCNhXrW5jNeWN4";   /* from: npx web-push generate-vapid-keys (public key only) */
 function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 var pushErr="";
-function pushSubscribe(){
+function pushSubscribe(forWaiting){
   pushErr="";
   if(!("serviceWorker" in navigator)||!window.PushManager||VAPID_PUBLIC.indexOf("PASTE")===0)return Promise.resolve(false);
   function doSubscribe(reg){
@@ -1161,7 +1178,7 @@ function pushSubscribe(){
       var u=uById(LV.me);
       return fetch(SB_URL+"/rest/v1/rpc/register_push",{method:"POST",
         headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},
-        body:JSON.stringify({p_endpoint:sub.endpoint,p_data:sub.toJSON(),p_user:u?u.name:null})}).then(function(r){
+        body:JSON.stringify({p_endpoint:sub.endpoint,p_data:sub.toJSON(),p_user:forWaiting?null:(u?u.user:null),p_device:devId()})}).then(function(r){
           if(!r.ok)return r.text().then(function(t){console.error("push_subscriptions save failed:",r.status,t);pushErr="Server saved no data (HTTP "+r.status+"): "+String(t).slice(0,400);return false;});
           return true;
         });
@@ -1178,12 +1195,25 @@ function pushSubscribe(){
     .then(doSubscribe)
     .catch(function(e){console.error("pushSubscribe error:",e);pushErr=((e&&e.name)?e.name+": ":"")+String((e&&e.message)||e).slice(0,400);return false;});
 }
+/* Waiting screen: let this not-yet-approved phone ask for a push when the admin approves it */
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("#lgNotify");if(!b)return;
+  if(!window.Notification){alert("This browser does not support notifications.");return}
+  function go(){b.disabled=true;b.textContent="Turning on...";
+    pushSubscribe(true).then(function(ok){
+      if(ok){b.textContent="Notification on. We will tell you when approved."}
+      else{b.disabled=false;b.textContent="Notify me when approved";try{alert("Could not turn on notifications: "+(pushErr||"unknown"))}catch(x){}}
+    })}
+  if(Notification.permission==="granted")go();
+  else if(Notification.permission==="denied")alert("Notifications are blocked for this site. Allow them in the phone settings, then try again.");
+  else Notification.requestPermission().then(function(p){if(p==="granted")go()});
+});
 function alertOn(){alertLabel();
   if(!("serviceWorker" in navigator)||!window.PushManager){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
     MASBanner({type:"alert",title:"Push not available",text:ios?"On iPhone, add this app to the Home Screen and open it from there, then tap Phone alerts again.":"This browser does not support push alerts."});return}
 pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
-  if(done){MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});try{alert("Push alerts saved [build 8]\n\nThis phone is registered for day sale alerts.")}catch(e){}}
-  else{MASBanner({type:"alert",title:"Push failed [build 8]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 8]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
+  if(done){MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});try{alert("Push alerts saved [build 9]\n\nThis phone is registered for day sale alerts.")}catch(e){}}
+  else{MASBanner({type:"alert",title:"Push failed [build 9]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 9]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
 }).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
@@ -1193,9 +1223,9 @@ document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))
     alert("Alerts are blocked for this app, and the app cannot ask again.\n\nTo turn them on:\n"+(ios
       ?"1. Open iPhone Settings and scroll down to this app (or Settings > Notifications > this app).\n2. Turn on Allow Notifications.\n3. Reopen the app, go to Setup and tap Phone alerts."
       :"1. Long-press the app icon on your home screen and tap App info (or open Settings > Apps > this app).\n2. Tap Notifications and turn them on.\n3. If it is still blocked: open Chrome > Settings > Site settings > Notifications, find this site and set it to Allow.\n4. Reopen the app, go to Setup and tap Phone alerts.\n\nLast resort: uninstall the app, install it again and tap Phone alerts."))}});
-window.addEventListener("focus",function(){alertLabel()});
+window.addEventListener("focus",function(){alertLabel();if(LV.me&&!document.body.classList.contains("locked"))lvLoad(true)});
 alertLabel();
-function enter(uid){hideLoader();LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");MASReport.drop("dev-queue");DVQ="";applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView(START);START="top";lvRender();lvSync();devLoad();saleCheck();_scrollTop();if(window.LOADERR)MASBanner({type:"alert",title:"Could not load data",text:"Check your connection and reload"});}
+function enter(uid){hideLoader();LV.me=uid;LV.f="Pending";LVQ="";MASReport.drop("lv-");MASReport.drop("dev-queue");DVQ="";applyUser();$("loginScreen").hidden=true;document.body.classList.remove("locked");setView(START);START="top";lvRender();lvSync();devLoad();lvLoad(true);saleCheck();_scrollTop();if(window.LOADERR)MASBanner({type:"alert",title:"Could not load data",text:"Check your connection and reload"});}
 function showLogin(){hideLoader();LVQ="";MASReport.drop("lv-");document.body.classList.add("locked");$("loginScreen").hidden=false;$("lgPass").value="";$("lgErr").textContent="";$("lgPend").hidden=true;
   var last="",cr=null;try{last=localStorage.getItem("mas_lastuser")||"";cr=JSON.parse(localStorage.getItem("mas_cred"))}catch(e){}
   if(cr&&cr.u){last=cr.u;$("lgPass").value=cr.p||""}
@@ -1375,7 +1405,7 @@ function stRender(){
   stStash();
   $("stBody").innerHTML=DV.page==="devices"?stDevices():DV.page==="leave"?stLeave():stProfile();
   var pf=$("stPrefs");if(pf)ST_IDS.forEach(function(i){pf.appendChild($(i))})}
-function stOpen(page,tab){alertLabel();DV.page=page||"profile";if(tab)DV.tab=tab;$("userPop").classList.remove("open");$("dvOv").hidden=false;stRender();devLoad()}
+function stOpen(page,tab){alertLabel();DV.page=page||"profile";if(tab)DV.tab=tab;$("userPop").classList.remove("open");$("dvOv").hidden=false;stRender();devLoad();lvLoad(true)}
 $("setupBtn").onclick=function(){stOpen("profile")};
 $("dvClose").onclick=function(){$("dvOv").hidden=true};
 $("stNav").onclick=function(e){var b=e.target.closest("[data-pg]");if(b){DV.page=b.dataset.pg;stRender()}};
@@ -1384,13 +1414,10 @@ $("stBody").onclick=function(e){
   var t=e.target.closest("[data-tab]");if(t){DV.tab=t.dataset.tab;stRender();return}
   var f=e.target.closest("[data-lf]");if(f){DV.lf=f.dataset.lf;stRender();return}
   var l=e.target.closest("[data-la]");
-  if(l){var lid=+l.dataset.id,la=l.dataset.la,me=uById(LV.me);
+  if(l){var lid=+l.dataset.id,la=l.dataset.la;
     if(la==="no"){LV.rej=LV.rej===lid?null:lid;stRender();return}
-    LV.reqs.forEach(function(r){if(r.id!==lid)return;var ok=la==="ok";
-      if(!ok){var inp=l.parentNode.querySelector("input");r.note=inp?inp.value.trim():""}
-      r.status=ok?"Approved":"Rejected";r.by=me.name;
-      if(r.uid!==me.id)lvNotify(r.uid,ok?"up":"down",r.type+" "+(ok?"approved":"rejected"),lvWhen(r)+" · by "+me.name+(r.note?" — "+r.note:""))});
-    LV.rej=null;lvSave();stRender();lvRender();lvSync();return}
+    var linp=l.parentNode.querySelector("input");
+    lvDecide(lid,la==="ok"?"ok":"no",linp?linp.value.trim():"",l);return}
   var g=e.target.closest("[data-go]");if(g){$("dvOv").hidden=true;setView(g.dataset.go);return}
   var b=e.target.closest("[data-act]"),m=devAdmin();if(!b||!m||b.disabled)return;
   var act=b.dataset.act,id=b.dataset.id,d=DEVS.filter(function(x){return x.device_id===id})[0];
@@ -1425,6 +1452,8 @@ var LOADED_AT=Date.now();
 document.addEventListener("visibilitychange",function(){
   if(!document.hidden&&Date.now()-LOADED_AT>10*60e3&&view!=="leave")location.reload()});
 setInterval(lvSync,APP.syncSeconds*1000);
+setInterval(function(){if(!document.hidden&&LV.me&&!document.body.classList.contains("locked"))lvLoad(true)},60000);   /* pick up leave changes made on other phones */
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&LV.me&&!document.body.classList.contains("locked"))lvLoad(true)});
 /* ===== PWA: install button + service worker ===== */
 var deferredInstall=null;
 var _inStandalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone;
