@@ -2,7 +2,7 @@
    - App files are cached so the app opens instantly and works offline.
    - The page (index.html) is fetched from the network first, so a new upload shows up as soon as you are online.
    - Anything from another site (your cloud API) is never cached. */
-const CACHE = "mas-v7";           // change this number whenever you upload new files (v2, v3 ...)
+const CACHE = "mas-v8";           // change this number whenever you upload new files (v2, v3 ...)
 const FILES = ["./", "index.html", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png"];
 
@@ -39,8 +39,8 @@ self.addEventListener("fetch", e => {
 self.addEventListener('push', function (event) {
   var d = {};
   try { d = event.data ? event.data.json() : {}; } catch (e) {}
-  event.waitUntil(self.registration.showNotification(d.title || 'New day sale', {
-    body: d.body || 'Tap to open',
+  event.waitUntil(self.registration.showNotification(d.title || 'MAS Digital', {
+    body: d.body || 'New day sale saved. Tap to open',
     icon: 'icons/apple-touch-icon.png',
     tag: 'mas-day-sale',          // a second push the same day replaces the first
     renotify: true,
