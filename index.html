@@ -1142,7 +1142,7 @@ function pushOk(){try{return localStorage.getItem("mas_push_ok")==="1"}catch(e){
 function pushSet(v){try{if(v)localStorage.setItem("mas_push_ok","1");else localStorage.removeItem("mas_push_ok")}catch(e){}}
 function alertLabel(){var n=window.Notification;$("alertState").textContent=!n?"Not supported":n.permission==="denied"?"Blocked":n.permission==="granted"?(pushOk()?"On":"Tap to finish"):"Off"}
 /* ===== Web Push: save this phone's push address in Supabase so the server can notify it ===== */
-var VAPID_PUBLIC="BJ2TlSL0B_SksWbJSCmu-04WvZtQNT_RYphsLg7paPt-gKvwuVkOWG2zqcnGli7ofswOMSHcZl_doBKofU46AS0";   /* from: npx web-push generate-vapid-keys (public key only) */
+var VAPID_PUBLIC="BK2wlPzb3lkZt0Mf0Dar8xzM8Tp-dWOTZe2ihxBX1o_iuvUr5w8dBzOcVtgK268qYU-L-i8hAQCNhXrW5jNeWN4";   /* from: npx web-push generate-vapid-keys (public key only) */
 function vapidBytes(k){var p="=".repeat((4-k.length%4)%4),r=atob((k+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 var pushErr="";
 function pushSubscribe(){
@@ -1182,8 +1182,8 @@ function alertOn(){alertLabel();
   if(!("serviceWorker" in navigator)||!window.PushManager){var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
     MASBanner({type:"alert",title:"Push not available",text:ios?"On iPhone, add this app to the Home Screen and open it from there, then tap Phone alerts again.":"This browser does not support push alerts."});return}
 pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
-  if(done){MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});try{alert("Push alerts saved [build 7]\n\nThis phone is registered for day sale alerts.")}catch(e){}}
-  else{MASBanner({type:"alert",title:"Push failed [build 7]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 7]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
+  if(done){MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});try{alert("Push alerts saved [build 8]\n\nThis phone is registered for day sale alerts.")}catch(e){}}
+  else{MASBanner({type:"alert",title:"Push failed [build 8]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 8]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
 }).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
