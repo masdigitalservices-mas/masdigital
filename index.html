@@ -1159,9 +1159,9 @@ function pushSubscribe(){
       return sub||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
     }).then(function(sub){
       var u=uById(LV.me);
-      return fetch(SB_URL+"/rest/v1/push_subscriptions",{method:"POST",
-        headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json",Prefer:"resolution=ignore-duplicates,return=minimal"},
-        body:JSON.stringify({endpoint:sub.endpoint,data:sub.toJSON(),user_name:u?u.name:null})}).then(function(r){
+      return fetch(SB_URL+"/rest/v1/rpc/register_push",{method:"POST",
+        headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},
+        body:JSON.stringify({p_endpoint:sub.endpoint,p_data:sub.toJSON(),p_user:u?u.name:null})}).then(function(r){
           if(!r.ok)return r.text().then(function(t){console.error("push_subscriptions save failed:",r.status,t);pushErr="Server saved no data (HTTP "+r.status+"): "+String(t).slice(0,400);return false;});
           return true;
         });
@@ -1183,7 +1183,7 @@ function alertOn(){alertLabel();
     MASBanner({type:"alert",title:"Push not available",text:ios?"On iPhone, add this app to the Home Screen and open it from there, then tap Phone alerts again.":"This browser does not support push alerts."});return}
 pushSubscribe().then(function(done){pushSet(!!done);alertLabel();
   if(done)MASBanner({type:"sale",title:"Push alerts saved",text:"This phone is registered. You will get notified when a new day sale is saved."});
-  else{MASBanner({type:"alert",title:"Push failed [build 5]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 5]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
+  else{MASBanner({type:"alert",title:"Push failed [build 6]",text:"ERROR: "+(pushErr||"unknown")});try{alert("Push failed [build 6]\n\nERROR: "+(pushErr||"unknown"))}catch(e){}}
 }).catch(function(err){MASBanner({type:"alert",title:"Push error",text:String(err).slice(0,120)});pushSet(false);alertLabel()});}
 $("alertBtn").onclick=null;
 document.addEventListener("click",function(e){if(!e.target.closest("#alertBtn"))return;e.stopPropagation();var n=window.Notification;if(!n)return;
