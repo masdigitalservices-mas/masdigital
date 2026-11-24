@@ -1066,7 +1066,7 @@ $("lvSubmit").onclick=function(){
   var who=me.role==="admin"?uById(+$("lvEmp").value):me,btn=this;btn.disabled=true;
   devRpc("leave_apply",{p_user:me.user,p_pin:String(me.pass),p_for:who?who.user:me.user,p_type:t,p_from:f,p_to:to,
     p_t1:t==="Permission"?$("lvT1").value:null,p_t2:t==="Permission"?$("lvT2").value:null,p_sess:t==="Half day"?$("lvSess").value:null,
-    p_reason:$("lvReason").value.trim()}).then(function(x){
+    p_reason:$("lvReason").value.trim(),p_synctomas:"N"}).then(function(x){
     btn.disabled=false;
     if(!x.ok||!x.data){$("lvErr").textContent="Could not send the request. Check your connection and try again.";return}
     $("lvReason").value="";$("lvBox").open=false;LV.f="Pending";lvLoad(true)})};
