@@ -1068,7 +1068,7 @@ $("lvSubmit").onclick=function(){
     p_t1:t==="Permission"?$("lvT1").value:null,p_t2:t==="Permission"?$("lvT2").value:null,p_sess:t==="Half day"?$("lvSess").value:null,
     p_reason:$("lvReason").value.trim(),p_synctomas:"N"}).then(function(x){
     btn.disabled=false;
-    if(!x.ok||!x.data){$("lvErr").textContent="Could not send the request. Check your connection and try again.";return}
+    if(!x.ok||!x.data){$("lvErr").textContent="Could not send the request. "+(x.ok?"The server refused it (check the user and request type).":(x.msg||"Check your connection and try again."));return}
     $("lvReason").value="";$("lvBox").open=false;LV.f="Pending";lvLoad(true)})};
 $("lvFrom").value=$("lvTo").value=todayStr();lvType();
 
@@ -1252,8 +1252,8 @@ function devRpc(fn,args){   /* resolves {ok:true,data} or {ok:false} (offline / 
   var ac=window.AbortController?new AbortController():null,t=setTimeout(function(){ac&&ac.abort()},7000);
   return fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",signal:ac?ac.signal:undefined,
     headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:JSON.stringify(args)})
-    .then(function(r){return r.ok?r.json().then(function(j){return{ok:true,data:j}}):{ok:false}})
-    .catch(function(){return{ok:false}}).then(function(x){clearTimeout(t);return x})}
+    .then(function(r){return r.ok?r.json().then(function(j){return{ok:true,data:j}}):r.text().then(function(t){var m=t;try{m=JSON.parse(t).message||t}catch(e){}return{ok:false,msg:"HTTP "+r.status+": "+String(m).slice(0,160)}})})
+    .catch(function(e){return{ok:false,msg:"No connection ("+((e&&e.name)||"error")+")"}}).then(function(x){clearTimeout(t);return x})}
 /* ---- test-mode stand-in for the Supabase device functions (same inputs/outputs) ---- */
 function dtDB(){var d=null;try{d=JSON.parse(localStorage.getItem("mas_devtest"))}catch(e){}
   if(d&&d.rows){d.rows=d.rows.filter(function(r){return r.status==="pending"||r.status==="approved"});return d}
